@@ -1,28 +1,50 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import {BrowserRouter, Route, Switch} from "react-router-dom";
+import {Redirect} from "react-router";
 
-class App extends Component {
+import appConstants from "./util/appConstants"
+import Login from "./page/Login"
+import Admin from "./page/Admin"
+import Teacher from "./page/Teacher"
+import Student from "./page/Student"
+import './App.css';
+import Teacher from "./page/Teacher";
+
+
+class App extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      role: appConstants.role.default,
+      wantedRole: ""
+    }
+  }
+
+  componentDidMount() {
+    //update role and wantedRole here
+  }
+
   render() {
+    if (this.wrongRole()) {
+      return <Redirect to={this.state.role}/>
+    }
+
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
+      <BrowserRouter>
+        <Switch>
+          <Route path="/login" component={Login}/>
+          <Route path="/admin" component={Admin}/>
+          <Route path="/teacher" component={Teacher}/>
+          <Route path="/student" component={Student}/>
+        </Switch>
+      </BrowserRouter>
     );
+  }
+
+  wrongRole() {
+    return this.state.role !== this.state.wantedRole;
   }
 }
 
-export default App;
+export default App
