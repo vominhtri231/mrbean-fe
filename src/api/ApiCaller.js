@@ -1,4 +1,4 @@
-const apiUrl = "localhost:8080/api";
+const apiUrl = "http://localhost:8080/api/";
 
 class ApiCaller {
   static post(url, body) {
@@ -21,13 +21,11 @@ class ApiCaller {
     return fetch(apiUrl + url, {
       method,
       headers: {
-        "Content-type": "application/json",
-        Accept: "application/json"
+        "Content-Type": "application/json",
       },
-      body
+      body: body ? JSON.stringify(body) : undefined
     }).then(rawResult => rawResult.json())
       .then(result => {
-        console.log(result)
         if (result.error) {
           return Promise.reject({error: result.message})
         }

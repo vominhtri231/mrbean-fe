@@ -8,7 +8,6 @@ import Admin from "./page/Admin"
 import Teacher from "./page/Teacher"
 import Student from "./page/Student"
 import './App.css';
-import Teacher from "./page/Teacher";
 
 
 class App extends React.Component {
@@ -26,9 +25,9 @@ class App extends React.Component {
   }
 
   render() {
-    if (this.wrongRole()) {
-      return <Redirect to={this.state.role}/>
-    }
+    // if (this.wrongRole()) {
+    //   return <Redirect to={this.state.role}/>
+    // }
 
     return (
       <BrowserRouter>
