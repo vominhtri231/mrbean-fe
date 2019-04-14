@@ -82,7 +82,7 @@ const styles = theme => ({
     padding: theme.spacing.unit * 3,
   },
   contentComponent: {
-    height:'100%'
+    height: '100%'
   },
 });
 
@@ -93,15 +93,15 @@ class CustomDrawer extends React.Component {
   };
 
   handleDrawerOpen = () => {
-    this.setState({openAddClassForm: true});
+    this.setState({open: true});
   };
 
   handleDrawerClose = () => {
-    this.setState({openAddClassForm: false});
+    this.setState({open: false});
   };
 
-  handleChangeFeatureIndex = (event, newIndex) => {
-    this.setState({currentFeatureIndex: newIndex});
+  handleChangeTab = (index) => {
+    this.setState({currentFeatureIndex: index});
   };
 
   render() {
@@ -156,20 +156,23 @@ class CustomDrawer extends React.Component {
           </div>
           <Divider/>
           <List>
-            {features.map((feature, index) => (
-              <ListItem button key={feature.name}
-                        onClick={event => this.handleChangeFeatureIndex(event, index)}
-                        selected={currentFeatureIndex === index}>
-                <ListItemIcon children={<Icon>{feature.icon}</Icon>}/>
-                <ListItemText primary={feature.name}/>
-              </ListItem>
-            ))}
+            {features.map((feature, index) => {
+                return (
+                  <ListItem button key={feature.name}
+                            onClick={() => this.handleChangeTab(index)}
+                            selected={currentFeatureIndex === index}>
+                    <ListItemIcon children={<Icon>{feature.icon}</Icon>}/>
+                    <ListItemText primary={feature.name}/>
+                  </ListItem>
+                )
+              }
+            )}
           </List>
         </Drawer>
         <main className={classes.content}>
           <div className={classes.toolbar}/>
           <Paper className={classes.contentComponent}>
-            <ContentComponent{...this.props}/>
+            <ContentComponent/>
           </Paper>
         </main>
       </div>

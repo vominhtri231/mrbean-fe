@@ -1,5 +1,5 @@
 import React from "react";
-import AdminApi from "../../../api/AdminApi";
+import ClassApi from "../../../api/ClassApi";
 import Fab from "@material-ui/core/Fab";
 import AddIcon from '@material-ui/icons/Add';
 import {withStyles} from "@material-ui/styles";
@@ -8,12 +8,14 @@ import SearchBar from "../../common/SearchBar";
 import List from "@material-ui/core/List";
 import ClassListItem from "./ClassListItem";
 import Typography from "@material-ui/core/Typography";
+import StudentApi from "../../../api/StudentApi";
+import TeacherApi from "../../../api/TeacherApi";
 
-const styles = theme => ({
+const styles = {
   fab: {
     position: 'fixed',
-    bottom: theme.spacing.unit * 2,
-    right: theme.spacing.unit * 2,
+    bottom: 16,
+    right: 16,
   },
   contentWrapper: {
     margin: '10px 8px',
@@ -21,11 +23,12 @@ const styles = theme => ({
   list: {
     width: '100%',
   },
-});
+};
 
-class ClassContent extends React.Component {
+class ClassPage extends React.Component {
   state = {
     klasses: [],
+    teachers: [],
     openAddClassForm: false,
   };
 
@@ -37,12 +40,6 @@ class ClassContent extends React.Component {
     this.setState({openAddClassForm: false});
   };
 
-  contain = (klass, keyword) => {
-    const lowerKeyword = keyword.toLowerCase();
-    return klass.name.toLowerCase().includes(lowerKeyword)
-      || klass.description.toLowerCase().includes(keyword);
-  };
-
   search = (keyword) => {
     const {klasses} = this.state;
     const searchedKlasses = klasses.map(klass => {
@@ -52,21 +49,46 @@ class ClassContent extends React.Component {
     this.setState({klasses: searchedKlasses});
   };
 
-  createClass = (name, description) => {
-    AdminApi.createClass(name, description).then(response => {
-      const klass = response.data;
-      const addedKlass = {name: klass.name, description: klass.description, id: klass.id};
-      const addedKlasses = this.state.klasses.concat(addedKlass);
-      this.setState({klasses: addedKlasses});
+  contain = (klass, keyword) => {
+    const lowerKeyword = keyword.toLowerCase();
+    return klass.name.toLowerCase().includes(lowerKeyword)
+      || klass.description.toLowerCase().includes(keyword);
+  };
+
+  createClass = async (name, description, teacherId, students) => {
+    console.log(teacherId);
+    const studentIds = await this.createStudentOfClass(students);
+    console.log(studentIds);
+
+    ClassApi.createClass(name, description, teacherId, studentIds).then(response => {
+      const {klasses} = this.state;
+      const addedKlasses = klasses.concat(response.data);
+      this.setState({klasses: addedKlasses})
     })
   };
 
+  createStudentOfClass = async (students) => {
+    return await Promise.all(students.map(async (student) => {
+      try {
+        const responseStudent = await StudentApi.createStudent(student.email, student.name, student.phoneNumber,
+          student.dateOfBirth, student.workspace, student.isWorker);
+        return responseStudent.data.id;
+      } catch (e) {
+        console.log(e);
+      }
+    }));
+  };
+
   getClasses = () => {
-    AdminApi.getClasses().then(response => this.setState({klasses: response.data}));
+    ClassApi.getClasses().then(response => this.setState({klasses: response.data}));
+  };
+
+  getTeachers = () => {
+    TeacherApi.getAll().then(response => this.setState({teachers: response.data}));
   };
 
   deleteClass = (id) => {
-    AdminApi.deleteClass(id).then(() => {
+    ClassApi.deleteClass(id).then(() => {
       const {klasses} = this.state;
       const deletedKlasses = klasses.filter(klass => klass.id !== id);
       this.setState({klasses: deletedKlasses})
@@ -75,10 +97,11 @@ class ClassContent extends React.Component {
 
   componentDidMount() {
     this.getClasses();
+    this.getTeachers();
   };
 
   render() {
-    const {klasses, openAddClassForm} = this.state;
+    const {klasses, teachers, openAddClassForm} = this.state;
     const {classes} = this.props;
     return (
       <div>
@@ -91,6 +114,7 @@ class ClassContent extends React.Component {
           <AddIcon/>
         </Fab>
         <AddClassForm open={openAddClassForm}
+                      teachers={teachers}
                       handleClose={this.handleCloseForm}
                       handleSubmit={this.createClass}/>
       </div>
@@ -98,7 +122,7 @@ class ClassContent extends React.Component {
   }
 
   renderListClasses = (klasses) => {
-    if (klasses.length === 0) {
+    if (klasses.every(klass => klass.hide)) {
       return (
         <Typography color="textSecondary" align="center">
           No classes yet
@@ -117,4 +141,4 @@ class ClassContent extends React.Component {
   }
 }
 
-export default withStyles(styles)(ClassContent);
+export default withStyles(styles)(ClassPage);

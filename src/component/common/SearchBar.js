@@ -24,12 +24,12 @@ const styles = theme => ({
 class SearchBar extends React.Component {
   handleSearchInputChange = (event) => {
     const {onSearch} = this.props;
-    const keyword=event.target.value;
+    const keyword = event.target.value;
     onSearch(keyword);
   };
 
   render() {
-    const {classes, searchPlaceHolder} = this.props;
+    const {classes, searchPlaceHolder, children} = this.props;
     return (
       <AppBar className={classes.searchBar} position="static" color="default" elevation={0}>
         <Toolbar>
@@ -49,6 +49,10 @@ class SearchBar extends React.Component {
               />
             </Grid>
             <Grid item>
+              {children ? <div style={{
+                marginRight: 10,
+                display: 'inline'
+              }}>{children}</div> : undefined}
               <Tooltip title="Reload">
                 <IconButton>
                   <RefreshIcon className={classes.block} color="inherit"/>

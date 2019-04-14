@@ -1,9 +1,10 @@
 import ApiCaller from "./ApiCaller"
 
-const baseUrl="user";
-class UserApi{
-  static getRole(token){
-    return ApiCaller.get(`${baseUrl}/${token}/role`);
+const baseUrl = "user";
+
+class UserApi {
+  static getUser() {
+    return ApiCaller.get(`${baseUrl}`);
   }
 }
 

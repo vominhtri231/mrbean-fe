@@ -1,21 +1,16 @@
-import ApiCaller from "./ApiCaller"
+import ApiCaller from "./ApiCaller";
+import appConstants from "../util/appConstants";
 
 const baseUrl = "admin";
 
 class AdminApi {
-  static createClass(name, description) {
-    return ApiCaller.post(`${baseUrl}/klass`, {
-      "name": name,
-      "description": description
+  static createAdmin(email, name) {
+    return ApiCaller.post(`${baseUrl}`, {
+      email: email,
+      name: name,
+      role: appConstants.roles.Admin
     })
-  }
-  static getClasses() {
-    return ApiCaller.get(`${baseUrl}/klass`)
-  }
-
-  static deleteClass(id){
-    return ApiCaller.delete(`${baseUrl}/klass/${id}`)
   }
 }
 
-export default AdminApi
+export default AdminApi;

@@ -14,7 +14,6 @@ import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import LastPageIcon from '@material-ui/icons/LastPage';
 import TableHead from "@material-ui/core/TableHead";
 import {TableHeader} from "./TableHeader";
-import CustomSearchInput from "../CustomSearchInput";
 
 const actionsStyles = theme => ({
   root: {
@@ -168,7 +167,6 @@ class PaginationTable extends React.Component {
             </TableRow>
           </TableFooter>
         </Table>
-        <CustomSearchInput/>
       </div>
     );
   }
@@ -176,7 +174,11 @@ class PaginationTable extends React.Component {
 
 export default withStyles(styles)(PaginationTable);
 
-{/*<PaginationTable headers={["Name", "Description"]}*/}
-                 {/*data={klasses}*/}
-                 {/*dataKeys={["name", "description"]}*/}
-                 {/*classes={classes.data}/>*/}
+{/*<PaginationTable headers={["Name", "Description"]}*/
+}
+{/*data={klasses}*/
+}
+{/*dataKeys={["name", "description"]}*/
+}
+{/*classes={classes.data}/>*/
+}

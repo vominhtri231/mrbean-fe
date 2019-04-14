@@ -1,8 +1,8 @@
 export default Object.freeze({
-  role: {
-    default: "login",
-    admin: "admin",
-    teacher: "teacher",
-    student: "student"
-  }
+  roles: {
+    Admin: {id: 1, authority: "admin"},
+    Teacher: {id: 2, authority: "teacher"},
+    Student: {id: 3, authority: "student"},
+  },
+  excelType : ".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel",
 })
