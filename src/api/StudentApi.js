@@ -15,6 +15,10 @@ class StudentApi {
       role: appConstants.roles.Student
     })
   }
+
+  static getAllOfClass(klassId){
+    return ApiCaller.get(`${baseUrl}?klassId=${klassId}`);
+  }
 }
 
 export default StudentApi;

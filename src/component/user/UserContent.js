@@ -1,15 +1,15 @@
 import React from "react";
 import Typography from "@material-ui/core/Typography";
 import List from "@material-ui/core/List";
-import UserApi from "../../../api/UserApi";
+import UserApi from "../../api/UserApi";
 import Fab from "@material-ui/core/Fab";
 import AddIcon from "@material-ui/icons/Add"
 import withStyles from "@material-ui/core/styles/withStyles";
 import UserListItem from "./UserListItem";
 import AddUserForm from "./AddUserForm";
-import AdminApi from "../../../api/AdminApi";
-import TeacherApi from "../../../api/TeacherApi";
-import StudentApi from "../../../api/StudentApi";
+import AdminApi from "../../api/AdminApi";
+import TeacherApi from "../../api/TeacherApi";
+import StudentApi from "../../api/StudentApi";
 import UserPageSearchBar from "./UserPageSearchBar";
 
 const styles = {
@@ -26,7 +26,7 @@ const styles = {
   },
 };
 
-class UserPage extends React.Component {
+class UserContent extends React.Component {
   state = {
     users: [],
     openAddUserForm: false,
@@ -134,4 +134,4 @@ class UserPage extends React.Component {
 
 }
 
-export default withStyles(styles)(UserPage);
+export default withStyles(styles)(UserContent);

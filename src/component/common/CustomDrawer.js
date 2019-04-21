@@ -172,7 +172,7 @@ class CustomDrawer extends React.Component {
         <main className={classes.content}>
           <div className={classes.toolbar}/>
           <Paper className={classes.contentComponent}>
-            <ContentComponent/>
+            {ContentComponent}
           </Paper>
         </main>
       </div>

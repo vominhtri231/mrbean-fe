@@ -1,15 +1,15 @@
 import React from "react";
-import ClassApi from "../../../api/ClassApi";
+import ClassApi from "../../api/ClassApi";
 import Fab from "@material-ui/core/Fab";
 import AddIcon from '@material-ui/icons/Add';
 import {withStyles} from "@material-ui/styles";
 import AddClassForm from "./AddClassForm"
-import SearchBar from "../../common/SearchBar";
-import List from "@material-ui/core/List";
-import ClassListItem from "./ClassListItem";
+import SearchBar from "../common/SearchBar";
 import Typography from "@material-ui/core/Typography";
-import StudentApi from "../../../api/StudentApi";
-import TeacherApi from "../../../api/TeacherApi";
+import StudentApi from "../../api/StudentApi";
+import TeacherApi from "../../api/TeacherApi";
+import PaginationTable from "../common/table/PaginationTable";
+import ClassDataRow from "./ClassDataRow";
 
 const styles = {
   fab: {
@@ -17,15 +17,12 @@ const styles = {
     bottom: 16,
     right: 16,
   },
-  contentWrapper: {
-    margin: '10px 8px',
-  },
   list: {
     width: '100%',
   },
 };
 
-class ClassPage extends React.Component {
+class ClassContent extends React.Component {
   state = {
     klasses: [],
     teachers: [],
@@ -40,6 +37,10 @@ class ClassPage extends React.Component {
     this.setState({openAddClassForm: false});
   };
 
+  handleOpenClassSpecific = (klassId) => {
+    this.props.history.push(`/class/${klassId}`);
+  };
+
   search = (keyword) => {
     const {klasses} = this.state;
     const searchedKlasses = klasses.map(klass => {
@@ -52,13 +53,11 @@ class ClassPage extends React.Component {
   contain = (klass, keyword) => {
     const lowerKeyword = keyword.toLowerCase();
     return klass.name.toLowerCase().includes(lowerKeyword)
-      || klass.description.toLowerCase().includes(keyword);
+      || klass.description.toLowerCase().includes(lowerKeyword);
   };
 
   createClass = async (name, description, teacherId, students) => {
-    console.log(teacherId);
     const studentIds = await this.createStudentOfClass(students);
-    console.log(studentIds);
 
     ClassApi.createClass(name, description, teacherId, studentIds).then(response => {
       const {klasses} = this.state;
@@ -79,8 +78,11 @@ class ClassPage extends React.Component {
     }));
   };
 
-  getClasses = () => {
-    ClassApi.getClasses().then(response => this.setState({klasses: response.data}));
+  getClasses = async (teacherId) => {
+    const response = teacherId ?
+      await ClassApi.getClassesOfTeacher(teacherId) :
+      await ClassApi.getClasses();
+    this.setState({klasses: response.data})
   };
 
   getTeachers = () => {
@@ -96,27 +98,29 @@ class ClassPage extends React.Component {
   };
 
   componentDidMount() {
-    this.getClasses();
+    const {teacherId} = this.props;
+    this.getClasses(teacherId);
     this.getTeachers();
   };
 
   render() {
     const {klasses, teachers, openAddClassForm} = this.state;
-    const {classes} = this.props;
+    const {classes, teacherId} = this.props;
     return (
       <div>
         <SearchBar searchPlaceHolder={"Search by class name or description"}
                    onSearch={this.search}/>
-        <div className={classes.contentWrapper}>
+        <div>
           {this.renderListClasses(klasses)}
         </div>
-        <Fab className={classes.fab} color='primary' onClick={this.handleOpenForm}>
-          <AddIcon/>
-        </Fab>
-        <AddClassForm open={openAddClassForm}
-                      teachers={teachers}
-                      handleClose={this.handleCloseForm}
-                      handleSubmit={this.createClass}/>
+        {!teacherId && <>
+          <Fab className={classes.fab} color='primary' onClick={this.handleOpenForm}>
+            <AddIcon/>
+          </Fab>
+          <AddClassForm open={openAddClassForm}
+                        teachers={teachers}
+                        handleClose={this.handleCloseForm}
+                        handleSubmit={this.createClass}/></>}
       </div>
     );
   }
@@ -125,20 +129,24 @@ class ClassPage extends React.Component {
     if (klasses.every(klass => klass.hide)) {
       return (
         <Typography color="textSecondary" align="center">
-          No classes yet
+          There are no classes
         </Typography>
       )
     }
     return (
-      <List>
-        {
-          klasses.filter(klass => !klass.hide).map(klass => (
-            <ClassListItem key={klass.id} klass={klass} onDelete={this.deleteClass}/>
-          ))
+      <PaginationTable
+        data={klasses.filter(klass => !klass.hide)}
+        headers={["Name", "Description", "Teacher", ""]}
+        renderRow={klass =>
+          <ClassDataRow
+            data={klass}
+            onDelete={this.deleteClass}
+            onOpenClassSpecific={() => this.handleOpenClassSpecific(klass.id)}
+          />
         }
-      </List>
+      />
     )
   }
 }
 
-export default withStyles(styles)(ClassPage);
+export default withStyles(styles)(ClassContent);

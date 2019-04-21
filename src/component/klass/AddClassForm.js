@@ -5,13 +5,13 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import FileInput from "../../common/FileInput";
+import FileInput from "../common/FileInput";
 import readXlsxFile from "read-excel-file";
 import {FormControl} from "@material-ui/core";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import InputLabel from "@material-ui/core/InputLabel";
-import appConstants from "../../../util/appConstants";
+import appConstants from "../../util/appConstants";
 
 class AddClassForm extends React.Component {
   state = {
@@ -26,7 +26,6 @@ class AddClassForm extends React.Component {
     const {handleClose, handleSubmit} = this.props;
     if (!files || !files[0]) return;
     const students = await this.xlsxFileToStudents(files[0]);
-    console.log(students);
     handleSubmit(name, description, chosenTeacherId, students);
     handleClose();
   };
@@ -34,7 +33,6 @@ class AddClassForm extends React.Component {
   async xlsxFileToStudents(file) {
     //TODO create form to match rows with student's properties
     return await readXlsxFile(file).then(rows => {
-      console.log(rows);
       const students = [];
       for (let i = 1; i < rows.length; i++) {
         const dataRow = rows[i];
@@ -94,7 +92,7 @@ class AddClassForm extends React.Component {
           <FormControl fullWidth style={{marginTop: 16}}>
             {!chosenTeacherId && <InputLabel>teacher</InputLabel>}
             <Select
-              value={chosenTeacherId}
+              value={chosenTeacherId?chosenTeacherId:""}
               onChange={this.handleTeacherChange}
             >
               {teachers.map(teacher =>

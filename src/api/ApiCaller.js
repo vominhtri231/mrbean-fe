@@ -6,7 +6,7 @@ class ApiCaller {
   }
 
   static update(url, body) {
-    return this.sendRequest(url, body, "UPDATE")
+    return this.sendRequest(url, body, "PUT")
   }
 
   static get(url, body) {

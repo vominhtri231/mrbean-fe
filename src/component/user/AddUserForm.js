@@ -11,7 +11,7 @@ import Dialog from "@material-ui/core/Dialog";
 import {FormControl} from "@material-ui/core";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
-import appConstants from "../../../util/appConstants";
+import appConstants from "../../util/appConstants";
 
 class AddUserForm extends React.Component {
   state = {

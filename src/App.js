@@ -1,13 +1,11 @@
 import React from 'react';
 import {BrowserRouter, Route, Switch} from "react-router-dom";
-import {Redirect} from "react-router";
-
-import appConstants from "./util/appConstants"
 import Login from "./page/Login"
 import Admin from "./page/Admin"
 import Teacher from "./page/Teacher"
 import Student from "./page/Student"
 import './App.css';
+import Klass from "./page/Klass";
 
 
 class App extends React.Component {
@@ -34,7 +32,8 @@ class App extends React.Component {
         <Switch>
           <Route path="/login" component={Login}/>
           <Route path="/admin" component={Admin}/>
-          <Route path="/teacher" component={Teacher}/>
+          <Route path="/class/:klassId" component={Klass}/>
+          <Route path="/teacher/:teacherId" component={Teacher}/>
           <Route path="/student" component={Student}/>
         </Switch>
       </BrowserRouter>

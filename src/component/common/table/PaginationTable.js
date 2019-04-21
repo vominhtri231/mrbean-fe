@@ -94,14 +94,13 @@ const TablePaginationActionsWrapped = withStyles(actionsStyles, {withTheme: true
   TablePaginationActions,
 );
 
-const styles = theme => ({
+const styles = ({
   table: {
     minWidth: 500,
     border: 1
   },
   tableWrapper: {
-    width: '96%',
-    marginTop: theme.spacing.unit * 4,
+    width: '100%',
     overflowX: 'auto',
   }
 });
@@ -121,7 +120,7 @@ class PaginationTable extends React.Component {
   };
 
   render() {
-    const {data, headers, dataKeys, classes} = this.props;
+    const {data, headers, classes, renderRow} = this.props;
     const {rowsPerPage, page} = this.state;
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, data.length - page * rowsPerPage);
 
@@ -136,13 +135,7 @@ class PaginationTable extends React.Component {
             </TableRow>
           </TableHead>
           <TableBody>
-            {data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => (
-              <TableRow key={row.id}>
-                {dataKeys.map(key => (
-                  <TableCell> {row[key]}</TableCell>)
-                )}
-              </TableRow>
-            ))}
+            {data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(renderRow)}
             {emptyRows > 0 && (
               <TableRow style={{height: 48 * emptyRows}}>
                 <TableCell colSpan={6}/>
@@ -173,12 +166,3 @@ class PaginationTable extends React.Component {
 }
 
 export default withStyles(styles)(PaginationTable);
-
-{/*<PaginationTable headers={["Name", "Description"]}*/
-}
-{/*data={klasses}*/
-}
-{/*dataKeys={["name", "description"]}*/
-}
-{/*classes={classes.data}/>*/
-}
