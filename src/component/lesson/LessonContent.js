@@ -47,16 +47,16 @@ class LessonContent extends React.Component {
       || lesson.description.toLowerCase().includes(lowerKeyword);
   };
 
-  createLesson = async (lessonNumber, description) => {
+  createLesson = async (lessonNumber, description, content) => {
     const {klass} = this.props;
     const {lessons} = this.state;
-    const response = await LessonApi.createLesson(lessonNumber, description, klass.id);
+    const response = await LessonApi.createLesson(lessonNumber, description, content, klass.id);
     const addedLessons = lessons.concat(response.data);
     this.setState({lessons: addedLessons});
   };
 
-  editLesson = async (lessonNumber, description, id) => {
-    const response = await LessonApi.update(lessonNumber, description, id)
+  editLesson = async (lessonNumber, description, content, id) => {
+    const response = await LessonApi.update(lessonNumber, description, content, id)
     const {lessons} = this.state;
     const updatedLesson = lessons.filter(lesson => lesson.id !== id).concat(response.data);
     this.setState({lessons: updatedLesson});

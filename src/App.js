@@ -6,6 +6,7 @@ import Teacher from "./page/Teacher"
 import Student from "./page/Student"
 import './App.css';
 import Klass from "./page/Klass";
+import ContentEditor from "./component/common/ContentEditor";
 
 
 class App extends React.Component {
@@ -34,6 +35,7 @@ class App extends React.Component {
           <Route path="/admin" component={Admin}/>
           <Route path="/class/:klassId" component={Klass}/>
           <Route path="/teacher/:teacherId" component={Teacher}/>
+          <Route path="/test" component={ContentEditor}/>
           <Route path="/student" component={Student}/>
         </Switch>
       </BrowserRouter>
