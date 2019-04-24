@@ -20,6 +20,10 @@ class ClassApi {
     return ApiCaller.get(`${baseUrl}?teacher=${teacherId}`)
   }
 
+  static getClassesOfStudent(studentId) {
+    return ApiCaller.get(`${baseUrl}?student=${studentId}`)
+  }
+
   static deleteClass(id) {
     return ApiCaller.delete(`${baseUrl}/${id}`)
   }

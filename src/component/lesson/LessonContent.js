@@ -1,13 +1,14 @@
 import * as React from "react";
 import SearchBar from "../common/SearchBar";
 import LessonApi from "../../api/LessonApi";
-import PaginationTable from "../common/table/PaginationTable";
 import LessonDataRow from "./LessonDataRow";
-import Typography from "@material-ui/core/Typography";
 import AddIcon from "@material-ui/icons/Add"
 import Fab from "@material-ui/core/Fab";
 import AddLessonForm from "./AddLessonForm";
 import EditLessonForm from "./EditLessonForm";
+import LessonContentViewer from "./LessonContentViewer";
+import Typography from "@material-ui/core/Typography";
+import PaginationTable from "../common/table/PaginationTable";
 
 class LessonContent extends React.Component {
   state = {
@@ -24,13 +25,14 @@ class LessonContent extends React.Component {
     this.setState({openAddLessonForm: false});
   };
 
-  handleOnEditLesson = (lesson) => {
+  handleOnChooseLesson = (lesson) => {
     this.setState({selectedLesson: lesson})
   };
 
   handleCloseEditForm = () => {
     this.setState({selectedLesson: undefined})
   };
+
 
   search = (keyword) => {
     const {lessons} = this.state;
@@ -43,7 +45,7 @@ class LessonContent extends React.Component {
 
   contain = (lesson, keyword) => {
     const lowerKeyword = keyword.toLowerCase();
-    return lesson.lessonNumber.toLowerCase().includes(lowerKeyword)
+    return lesson.lessonNumber.toString().toLowerCase().includes(lowerKeyword)
       || lesson.description.toLowerCase().includes(lowerKeyword);
   };
 
@@ -70,6 +72,14 @@ class LessonContent extends React.Component {
     });
   };
 
+  async componentDidUpdate(prevProps) {
+    if (JSON.stringify(this.props.klass) !== JSON.stringify(prevProps.klass)) {
+      const klass = this.props.klass;
+      const response = await LessonApi.getAllOfClass(klass.id);
+      this.setState({lessons: response.data});
+    }
+  }
+
   async componentDidMount() {
     const {klass} = this.props;
     const response = await LessonApi.getAllOfClass(klass.id);
@@ -78,37 +88,50 @@ class LessonContent extends React.Component {
 
   render() {
     const {lessons, openAddLessonForm, selectedLesson} = this.state;
+    const {watchMode} = this.props;
     return <div>
       <SearchBar searchPlaceHolder={"Search by lesson number or description "}
                  onSearch={this.search}/>
       <div>
         {this.renderLessons(lessons)}
       </div>
-      <Fab
-        style={{
-          position: 'fixed',
-          bottom: 16,
-          right: 16,
-        }}
-        color='primary'
-        onClick={this.handleOnAddLesson}>
-        <AddIcon/>
-      </Fab>
-      <AddLessonForm
-        open={openAddLessonForm}
-        handleClose={this.handleCloseAddForm}
-        handleSubmit={this.createLesson}
-      />
-      <EditLessonForm
-        open={!!selectedLesson}
-        lesson={selectedLesson}
-        handleClose={this.handleCloseEditForm}
-        handleSubmit={this.editLesson}
-      />
+      {(!watchMode) &&
+      <>
+        <Fab
+          style={{
+            position: 'fixed',
+            bottom: 16,
+            right: 16,
+          }}
+          color='primary'
+          onClick={this.handleOnAddLesson}>
+          <AddIcon/>
+        </Fab>
+        <AddLessonForm
+          open={openAddLessonForm}
+          handleClose={this.handleCloseAddForm}
+          handleSubmit={this.createLesson}
+        />
+      </>}
+      {watchMode ?
+        <LessonContentViewer
+          open={!!selectedLesson}
+          lesson={selectedLesson}
+          handleClose={this.handleCloseEditForm}/>
+        :
+        <EditLessonForm
+          open={!!selectedLesson}
+          lesson={selectedLesson}
+          handleClose={this.handleCloseEditForm}
+          handleSubmit={this.editLesson}
+        />
+      }
     </div>
   }
 
+
   renderLessons(lessons) {
+    const {watchMode} = this.props;
     if (lessons.every(lesson => lesson.hide)) {
       return (
         <Typography color="textSecondary" align="center">
@@ -122,10 +145,11 @@ class LessonContent extends React.Component {
         headers={["Lesson number", "Description", ""]}
         renderRow={lesson =>
           <LessonDataRow
+            watchMode={watchMode}
             key={lesson.id}
             data={lesson}
+            onChoose={this.handleOnChooseLesson}
             onDelete={this.removeFromClass}
-            onEdit={this.handleOnEditLesson}
           />
         }
       />

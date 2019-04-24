@@ -11,7 +11,6 @@ import {FormControl} from "@material-ui/core";
 import ContentEditor from "../common/ContentEditor";
 
 class EditLessonForm extends React.Component {
-
   constructor(props) {
     super(props);
     this.state = {

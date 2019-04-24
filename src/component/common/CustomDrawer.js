@@ -105,7 +105,7 @@ class CustomDrawer extends React.Component {
   };
 
   render() {
-    const {classes, theme} = this.props;
+    const {classes, theme, children} = this.props;
     const {pageName, features} = this.props;
     const {currentFeatureIndex} = this.state;
     const ContentComponent = features[currentFeatureIndex].content;
@@ -133,6 +133,7 @@ class CustomDrawer extends React.Component {
             <Typography variant="h6" color="inherit" noWrap>
               {pageName}
             </Typography>
+            {!!children && children}
           </Toolbar>
         </AppBar>
         <Drawer

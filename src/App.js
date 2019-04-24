@@ -35,8 +35,7 @@ class App extends React.Component {
           <Route path="/admin" component={Admin}/>
           <Route path="/class/:klassId" component={Klass}/>
           <Route path="/teacher/:teacherId" component={Teacher}/>
-          <Route path="/test" component={ContentEditor}/>
-          <Route path="/student" component={Student}/>
+          <Route path="/student/:studentId" component={Student}/>
         </Switch>
       </BrowserRouter>
     );
