@@ -120,12 +120,12 @@ class PaginationTable extends React.Component {
   };
 
   render() {
-    const {data, headers, classes, renderRow} = this.props;
+    const {data, headers, classes, renderRow, style} = this.props;
     const {rowsPerPage, page} = this.state;
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, data.length - page * rowsPerPage);
 
     return (
-      <div className={classes.tableWrapper}>
+      <div className={classes.tableWrapper} style={style}>
         <Table className={classes.table}>
           <TableHead>
             <TableRow>

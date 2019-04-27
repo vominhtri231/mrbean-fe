@@ -7,14 +7,28 @@ import Fab from "@material-ui/core/Fab";
 import AddLessonForm from "./AddLessonForm";
 import EditLessonForm from "./EditLessonForm";
 import LessonContentViewer from "./LessonContentViewer";
-import Typography from "@material-ui/core/Typography";
+import HomeworkInput from "../homework/HomeworkInput";
+import HomeworkApi from "../../api/HomeworkApi";
+import ConfirmDialog from "../common/ConfirmDialog";
 import PaginationTable from "../common/table/PaginationTable";
+import Typography from "@material-ui/core/Typography";
+import DoHomework from "../homework/DoHomework";
+import HomeworkStudentApi from "../../api/HomeworkStudentApi";
+import HomeworkResult from "../homework/HomeworkResult";
 
 class LessonContent extends React.Component {
   state = {
     lessons: [],
+    savedHomeworkStudent: {},
     openAddLessonForm: false,
-    selectedLesson: undefined
+    selectedLesson: undefined,
+    deletingLesson: undefined,
+    homeworkLessonId: undefined,
+    selectedHomework: undefined,
+    deletingHomework: undefined,
+    doingHomework: undefined,
+    endingHomework: undefined,
+    watchingHomework: undefined,
   };
 
   handleOnAddLesson = () => {
@@ -33,6 +47,67 @@ class LessonContent extends React.Component {
     this.setState({selectedLesson: undefined})
   };
 
+  handleDeleteLesson = (lesson) => {
+    this.setState({deletingLesson: lesson})
+  };
+
+  handleCloseDeleteLesson = () => {
+    this.setState({deletingLesson: undefined})
+  };
+
+  handleOpenAddHomeworkForm = (lessonId) => {
+    this.setState({
+      homeworkLessonId: lessonId, selectedHomework: undefined
+    })
+  };
+
+  handleOpenEditHomeworkForm = (lessonId, selectedHomework) => {
+    this.setState({
+      homeworkLessonId: lessonId, selectedHomework: selectedHomework
+    })
+  };
+
+  handleCloseHomeworkForm = () => {
+    this.setState({
+      homeworkLessonId: undefined, selectedHomework: undefined
+    })
+  };
+
+  handleOpenDeleteHomeworkDialog = (lesson) => {
+    this.setState({
+      deletingHomework: lesson
+    })
+  };
+
+  handleCloseDeleteHomeworkDialog = () => {
+    this.setState({
+      deletingHomework: undefined
+    })
+  };
+
+  handleOpenDoHomeworkDialog = (homework) => {
+    this.setState({doingHomework: homework})
+  };
+
+  handleCloseDoHomeworkDialog = () => {
+    this.setState({doingHomework: undefined})
+  };
+
+  handleOpenEndHomeworkDialog = (homework) => {
+    this.setState({endingHomework: homework})
+  };
+
+  handleCloseEndHomeworkDialog = () => {
+    this.setState({endingHomework: undefined})
+  };
+
+  handleOpenWatchingResultHomeworkDialog = (homework) => {
+    this.setState({watchingHomework: homework})
+  };
+
+  handleCloseWatchingResultHomeDialog = () => {
+    this.setState({watchingHomework: undefined})
+  };
 
   search = (keyword) => {
     const {lessons} = this.state;
@@ -58,7 +133,7 @@ class LessonContent extends React.Component {
   };
 
   editLesson = async (lessonNumber, description, content, id) => {
-    const response = await LessonApi.update(lessonNumber, description, content, id)
+    const response = await LessonApi.update(lessonNumber, description, content, id);
     const {lessons} = this.state;
     const updatedLesson = lessons.filter(lesson => lesson.id !== id).concat(response.data);
     this.setState({lessons: updatedLesson});
@@ -72,66 +147,136 @@ class LessonContent extends React.Component {
     });
   };
 
+  addHomework = async (name, deathLine, lessonId, questions) => {
+    const response = await HomeworkApi.createHomework(name, deathLine, lessonId, questions);
+    const addingHomework = response.data;
+    const {lessons} = this.state;
+
+    const addingHomeworkLesson = lessons.filter(lesson => lesson.id === lessonId)[0];
+    const originHomeworkList = addingHomeworkLesson.homeworkList;
+    const addedHomeworkList = !!originHomeworkList ? originHomeworkList.concat(addingHomework) : [addingHomework];
+    const addedHomeworkLesson = {...addingHomeworkLesson, homeworkList: addedHomeworkList};
+
+    const addedHomeworkLessons = lessons.map(lesson => {
+      if (lesson.id === lessonId) {
+        return addedHomeworkLesson;
+      }
+      return lesson;
+    });
+    this.setState({lessons: addedHomeworkLessons});
+  };
+
+  editHomework = async (id, name, deathLine, lessonId, questions) => {
+    const response = await HomeworkApi.updateHomework(id, name, deathLine, questions);
+    const updatingHomework = response.data;
+    const {lessons} = this.state;
+
+    const updatingHomeworkLesson = lessons.filter(lesson => lesson.id === lessonId)[0];
+    const originHomeworkList = updatingHomeworkLesson.homeworkList;
+    const updatedHomeworkList = originHomeworkList
+      .filter(homework => homework.id !== id)
+      .concat(updatingHomework);
+    const updatedHomeworkLesson = {...updatingHomeworkLesson, homeworkList: updatedHomeworkList};
+
+    const updatedHomeworkLessons = lessons.map(lesson => {
+      if (lesson.id === lessonId) {
+        return updatedHomeworkLesson;
+      }
+      return lesson;
+    });
+    this.setState({lessons: updatedHomeworkLessons});
+  };
+
+  deleteHomework = async (id) => {
+    await HomeworkApi.deleteHomework(id);
+    const {lessons} = this.state;
+    const deletedLessons = lessons.map(lesson => {
+      const deletedHomeworkList = lesson.homeworkList.filter(homework => homework.id !== id);
+      return {...lesson, homeworkList: deletedHomeworkList}
+    });
+    this.setState({lessons: deletedLessons});
+  };
+
+  doHomework = async (homeworkId, choices) => {
+    const {studentId} = this.props;
+    const {savedHomeworkStudent} = this.state;
+    const response = await HomeworkStudentApi.saveHomeworkStudent(homeworkId, studentId, choices);
+    const addedHomeworkStudent = {...savedHomeworkStudent, [homeworkId]: response.data.choices};
+    this.setState({savedHomeworkStudent: addedHomeworkStudent})
+  };
+
+  endHomework = async (homeworkId) => {
+    const response = await HomeworkApi.endHomework(homeworkId);
+    const endedHomework = response.data;
+    const {lessons} = this.state;
+    const endedLessons = lessons.map(lesson => {
+      const endedHomeworkList = lesson.homeworkList
+        .map(homework => {
+          if (homework.id === endedHomework.id) {
+            return endedHomework;
+          }
+          return homework;
+        });
+      return {...lesson, homeworkList: endedHomeworkList}
+    });
+    this.setState({lessons: endedLessons});
+  };
+
+  getHomeworkStudents = async (homeworkIds, studentId) => {
+    const responses = await Promise.all(
+      homeworkIds.map(homeworkId => HomeworkStudentApi.getHomeworkStudent(homeworkId, studentId)));
+    const savedHomeworkStudent = responses
+      .map(response => response.data)
+      .filter(homeworkStudent => !!homeworkStudent.homework)
+      .reduce((savingHomeworkStudent, homeworkStudent) => {
+        savingHomeworkStudent[homeworkStudent.homework.id] = homeworkStudent.choices;
+        return savingHomeworkStudent;
+      }, {});
+    this.setState({savedHomeworkStudent})
+  };
+
   async componentDidUpdate(prevProps) {
     if (JSON.stringify(this.props.klass) !== JSON.stringify(prevProps.klass)) {
-      const klass = this.props.klass;
-      const response = await LessonApi.getAllOfClass(klass.id);
-      this.setState({lessons: response.data});
+      await this.init()
     }
   }
 
   async componentDidMount() {
-    const {klass} = this.props;
+    await this.init()
+  }
+
+  async init() {
+    const {klass, studentId} = this.props;
     const response = await LessonApi.getAllOfClass(klass.id);
-    this.setState({lessons: response.data});
+    const lessons = response.data;
+    this.setState({lessons});
+
+    if (studentId) {
+      const homeworkIdsOfLessons = lessons
+        .map(lesson => {
+          return lesson.homeworkList.map(homework => homework.id)
+        })
+        .reduce((homeworkIds, homeworkIdsOfLessons) => homeworkIdsOfLessons.concat(homeworkIds), []);
+      await this.getHomeworkStudents(homeworkIdsOfLessons, studentId)
+    }
   }
 
   render() {
-    const {lessons, openAddLessonForm, selectedLesson} = this.state;
     const {watchMode} = this.props;
     return <div>
       <SearchBar searchPlaceHolder={"Search by lesson number or description "}
                  onSearch={this.search}/>
       <div>
-        {this.renderLessons(lessons)}
+        {this.renderLessons()}
       </div>
-      {(!watchMode) &&
-      <>
-        <Fab
-          style={{
-            position: 'fixed',
-            bottom: 16,
-            right: 16,
-          }}
-          color='primary'
-          onClick={this.handleOnAddLesson}>
-          <AddIcon/>
-        </Fab>
-        <AddLessonForm
-          open={openAddLessonForm}
-          handleClose={this.handleCloseAddForm}
-          handleSubmit={this.createLesson}
-        />
-      </>}
-      {watchMode ?
-        <LessonContentViewer
-          open={!!selectedLesson}
-          lesson={selectedLesson}
-          handleClose={this.handleCloseEditForm}/>
-        :
-        <EditLessonForm
-          open={!!selectedLesson}
-          lesson={selectedLesson}
-          handleClose={this.handleCloseEditForm}
-          handleSubmit={this.editLesson}
-        />
-      }
+      {watchMode ? this.renderWatchModeGadgets()
+        : this.renderNonWatchModeGadgets()}
     </div>
   }
 
-
-  renderLessons(lessons) {
+  renderLessons() {
     const {watchMode} = this.props;
+    const {lessons} = this.state;
     if (lessons.every(lesson => lesson.hide)) {
       return (
         <Typography color="textSecondary" align="center">
@@ -142,18 +287,104 @@ class LessonContent extends React.Component {
     return (
       <PaginationTable
         data={lessons.filter(lesson => !lesson.hide)}
-        headers={["Lesson number", "Description", ""]}
+        headers={["Lesson number", "Description", "Homework", ""]}
         renderRow={lesson =>
           <LessonDataRow
             watchMode={watchMode}
             key={lesson.id}
             data={lesson}
             onChoose={this.handleOnChooseLesson}
-            onDelete={this.removeFromClass}
+            onDelete={this.handleDeleteLesson}
+            addHomework={this.handleOpenAddHomeworkForm}
+            deleteHomework={this.handleOpenDeleteHomeworkDialog}
+            editHomework={this.handleOpenEditHomeworkForm}
+            doHomework={this.handleOpenDoHomeworkDialog}
+            watchHomework={this.handleOpenWatchingResultHomeworkDialog}
           />
         }
       />
     )
+  }
+
+  renderWatchModeGadgets() {
+    const {selectedLesson, doingHomework, savedHomeworkStudent} = this.state;
+    return <>
+      <LessonContentViewer
+        open={!!selectedLesson}
+        lesson={selectedLesson}
+        handleClose={this.handleCloseEditForm}/>
+      {!!doingHomework && <DoHomework
+        open={!!doingHomework}
+        homework={doingHomework}
+        choices={savedHomeworkStudent[doingHomework.id]}
+        handleSubmit={this.doHomework}
+        handleClose={this.handleCloseDoHomeworkDialog}
+      />}
+    </>
+  }
+
+  renderNonWatchModeGadgets() {
+    const {
+      openAddLessonForm, selectedLesson, homeworkLessonId,
+      selectedHomework, deletingHomework, deletingLesson,
+      endingHomework, watchingHomework
+    } = this.state;
+    return <>
+      <Fab
+        style={{
+          position: 'fixed',
+          bottom: 16,
+          right: 16,
+        }}
+        color='primary'
+        onClick={this.handleOnAddLesson}>
+        <AddIcon/>
+      </Fab>
+      <AddLessonForm
+        open={openAddLessonForm}
+        handleClose={this.handleCloseAddForm}
+        handleSubmit={this.createLesson}
+      />
+      <EditLessonForm
+        open={!!selectedLesson}
+        lesson={selectedLesson}
+        handleClose={this.handleCloseEditForm}
+        handleSubmit={this.editLesson}
+      />
+      <HomeworkInput
+        open={!!homeworkLessonId}
+        lessonId={homeworkLessonId}
+        homework={selectedHomework}
+        addHomework={this.addHomework}
+        editHomework={this.editHomework}
+        endHomework={this.handleOpenEndHomeworkDialog}
+        handleClose={this.handleCloseHomeworkForm}
+      />
+      <HomeworkResult
+        open={!!watchingHomework}
+        homework={watchingHomework}
+        handleClose={this.handleCloseWatchingResultHomeDialog}
+      />
+      {!!deletingHomework && <ConfirmDialog
+        open={!!deletingHomework}
+        title={`Do you want to delete homework with name : ${deletingHomework.name}`}
+        handleSubmit={() => this.deleteHomework(deletingHomework.id)}
+        handleClose={this.handleCloseDeleteHomeworkDialog}
+      />}
+      {!!deletingLesson && <ConfirmDialog
+        open={!!deletingLesson}
+        title={`Do you want to delete lesson with lesson number : ${deletingLesson.lessonNumber}
+                and description : ${deletingLesson.description} `}
+        handleSubmit={() => this.removeFromClass(deletingLesson.id)}
+        handleClose={this.handleCloseDeleteLesson}
+      />}
+      {!!endingHomework && <ConfirmDialog
+        open={!!endingHomework}
+        title={`Do you want to end homework with name : ${endingHomework.name}`}
+        handleSubmit={() => this.endHomework(endingHomework.id)}
+        handleClose={this.handleCloseEndHomeworkDialog}
+      />}
+    </>
   }
 }
 

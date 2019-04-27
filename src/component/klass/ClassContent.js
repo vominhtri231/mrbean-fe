@@ -139,6 +139,7 @@ class ClassContent extends React.Component {
         headers={["Name", "Description", "Teacher", ""]}
         renderRow={klass =>
           <ClassDataRow
+            key={klass.id}
             data={klass}
             onDelete={this.deleteClass}
             onOpenClassSpecific={() => this.handleOpenClassSpecific(klass.id)}

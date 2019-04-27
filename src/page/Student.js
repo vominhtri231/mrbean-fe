@@ -1,10 +1,8 @@
 import React from 'react';
 import ClassApi from "../api/ClassApi";
-import {Typography} from "@material-ui/core";
+import {Button, Typography} from "@material-ui/core";
 import LessonContent from "../component/lesson/LessonContent";
 import CustomDrawer from "../component/common/CustomDrawer";
-import IconButton from "@material-ui/core/IconButton";
-import ChangeHistoryIcon from "@material-ui/icons/ChangeHistory"
 import ChooseClassForm from "../component/common/ChooseClassForm";
 
 class Student extends React.Component {
@@ -46,6 +44,7 @@ class Student extends React.Component {
 
   render() {
     const {klasses, openChangeKlass, selectedKlass} = this.state;
+    const studentId = this.props.match.params.studentId;
     return (selectedKlass ?
       <>
         <CustomDrawer pageName={`${selectedKlass.name}`}
@@ -54,17 +53,17 @@ class Student extends React.Component {
                           name: "Lessons of class",
                           path: "/student",
                           icon: "assessment",
-                          content: <LessonContent klass={selectedKlass} watchMode/>
+                          content: <LessonContent klass={selectedKlass} watchMode studentId={studentId}/>
                         },
                       ]}
                       {...this.props}
         >
-          <IconButton
-            color="inherit"
-            onClick={this.handleChangeClassOpen}
-          >
-            <ChangeHistoryIcon/>
-          </IconButton>
+          <Button
+            style={{position: 'absolute', right: 30}}
+            variant="contained" color="secondary"
+            onClick={this.handleChangeClassOpen}>
+            Change class
+          </Button>
         </CustomDrawer>
         <ChooseClassForm
           open={openChangeKlass}
