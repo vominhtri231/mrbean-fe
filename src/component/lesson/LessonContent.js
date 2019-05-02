@@ -12,9 +12,11 @@ import HomeworkApi from "../../api/HomeworkApi";
 import ConfirmDialog from "../common/ConfirmDialog";
 import PaginationTable from "../common/table/PaginationTable";
 import Typography from "@material-ui/core/Typography";
-import DoHomework from "../homework/DoHomework";
+import HomeworkWorksheet from "../homework/HomeworkWorksheet";
 import HomeworkStudentApi from "../../api/HomeworkStudentApi";
 import HomeworkResult from "../homework/HomeworkResult";
+import appConstants from "../../util/appConstants";
+import HomeworkSpec from "../homework/HomeworkSpec";
 
 class LessonContent extends React.Component {
   state = {
@@ -262,20 +264,24 @@ class LessonContent extends React.Component {
   }
 
   render() {
-    const {watchMode} = this.props;
+    const {mode} = this.props;
     return <div>
       <SearchBar searchPlaceHolder={"Search by lesson number or description "}
                  onSearch={this.search}/>
       <div>
         {this.renderLessons()}
       </div>
-      {watchMode ? this.renderWatchModeGadgets()
-        : this.renderNonWatchModeGadgets()}
+      {mode === appConstants.modes.Student ?
+        this.renderStudentModeGadgets() :
+        mode === appConstants.modes.Teacher ?
+          this.renderTeacherModeGadgets() :
+          this.renderAdminModeGadgets()
+      }
     </div>
   }
 
   renderLessons() {
-    const {watchMode} = this.props;
+    const {mode} = this.props;
     const {lessons} = this.state;
     if (lessons.every(lesson => lesson.hide)) {
       return (
@@ -290,7 +296,7 @@ class LessonContent extends React.Component {
         headers={["Lesson number", "Description", "Homework", ""]}
         renderRow={lesson =>
           <LessonDataRow
-            watchMode={watchMode}
+            mode={mode}
             key={lesson.id}
             data={lesson}
             onChoose={this.handleOnChooseLesson}
@@ -306,14 +312,14 @@ class LessonContent extends React.Component {
     )
   }
 
-  renderWatchModeGadgets() {
+  renderStudentModeGadgets() {
     const {selectedLesson, doingHomework, savedHomeworkStudent} = this.state;
     return <>
       <LessonContentViewer
         open={!!selectedLesson}
         lesson={selectedLesson}
         handleClose={this.handleCloseEditForm}/>
-      {!!doingHomework && <DoHomework
+      {!!doingHomework && <HomeworkWorksheet
         open={!!doingHomework}
         homework={doingHomework}
         choices={savedHomeworkStudent[doingHomework.id]}
@@ -323,7 +329,7 @@ class LessonContent extends React.Component {
     </>
   }
 
-  renderNonWatchModeGadgets() {
+  renderTeacherModeGadgets() {
     const {
       openAddLessonForm, selectedLesson, homeworkLessonId,
       selectedHomework, deletingHomework, deletingLesson,
@@ -384,6 +390,26 @@ class LessonContent extends React.Component {
         handleSubmit={() => this.endHomework(endingHomework.id)}
         handleClose={this.handleCloseEndHomeworkDialog}
       />}
+    </>
+  }
+
+  renderAdminModeGadgets() {
+    const {selectedLesson, selectedHomework, watchingHomework} = this.state;
+    return <>
+      <LessonContentViewer
+        open={!!selectedLesson}
+        lesson={selectedLesson}
+        handleClose={this.handleCloseEditForm}/>
+      {!!selectedHomework && <HomeworkSpec
+        open={!!selectedHomework}
+        homework={selectedHomework}
+        handleClose={this.handleCloseHomeworkForm}
+      />}
+      <HomeworkResult
+        open={!!watchingHomework}
+        homework={watchingHomework}
+        handleClose={this.handleCloseWatchingResultHomeDialog}
+      />
     </>
   }
 }

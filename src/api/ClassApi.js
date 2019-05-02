@@ -12,6 +12,20 @@ class ClassApi {
     })
   }
 
+  static removeStudents(id, studentIds) {
+    return ApiCaller.update(`${baseUrl}/removeStudents`, {
+      "id": id,
+      "studentIds": studentIds
+    })
+  }
+
+  static addStudents(id, studentIds) {
+    return ApiCaller.update(`${baseUrl}/addStudents`, {
+      "id": id,
+      "studentIds": studentIds
+    })
+  }
+
   static getClasses() {
     return ApiCaller.get(`${baseUrl}`)
   }
@@ -22,6 +36,15 @@ class ClassApi {
 
   static getClassesOfStudent(studentId) {
     return ApiCaller.get(`${baseUrl}?student=${studentId}`)
+  }
+
+  static updateClass(id, name, description, teacherId) {
+    return ApiCaller.update(`${baseUrl}`, {
+      "id": id,
+      "name": name,
+      "description": description,
+      "teacherId": teacherId,
+    })
   }
 
   static deleteClass(id) {

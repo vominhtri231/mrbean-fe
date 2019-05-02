@@ -4,35 +4,30 @@ import DialogContent from "@material-ui/core/DialogContent";
 import TextField from "@material-ui/core/TextField";
 import DialogActions from "@material-ui/core/DialogActions";
 import Button from "@material-ui/core/Button";
-import InputLabel from "@material-ui/core/InputLabel";
-import Select from "@material-ui/core/Select";
-import MenuItem from "@material-ui/core/MenuItem";
 import Dialog from "@material-ui/core/Dialog";
-import {FormControl} from "@material-ui/core";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import appConstants from "../../util/appConstants";
+import AdminApi from "../../api/AdminApi";
+import TeacherApi from "../../api/TeacherApi";
+import StudentApi from "../../api/StudentApi";
+import DateUtils from "../../util/DateUtils";
 
-class AddUserForm extends React.Component {
+class EditUserForm extends React.Component {
   state = {
-    role: appConstants.roles.Admin,
     email: "",
     name: "",
     phoneNumber: "",
-    dateOfBirth: "",
+    dateOfBirth: DateUtils.getCurrentDate(),
     workspace: "",
     isWorker: false,
   };
 
   handleSubmitButtonClick = () => {
-    const {role, email, name, phoneNumber, dateOfBirth, workspace, isWorker} = this.state;
-    const {handleClose, handleSubmit} = this.props;
-    handleSubmit(role, email, name, phoneNumber, dateOfBirth, workspace, isWorker);
+    const {email, name, phoneNumber, dateOfBirth, workspace, isWorker} = this.state;
+    const {user, handleClose, handleSubmit} = this.props;
+    handleSubmit(user.role, user.id, email, name, phoneNumber, dateOfBirth, workspace, isWorker);
     handleClose();
-  };
-
-  handleRoleChange = (event) => {
-    this.setState({role: event.target.value});
   };
 
   handleEmailChange = (event) => {
@@ -59,34 +54,53 @@ class AddUserForm extends React.Component {
     this.setState({workspace: event.target.value})
   };
 
+  async componentDidUpdate(prevProps) {
+    if (JSON.stringify(this.props.user) !== JSON.stringify(prevProps.user) && this.props.user) {
+      const user = this.props.user;
+      const response = await EditUserForm.getFullUserInfo(user);
+      const fullUser = response.data;
+      this.setState({
+        email: fullUser.email,
+        name: fullUser.name,
+        phoneNumber: fullUser.phoneNumber ? fullUser.phoneNumber : this.state.phoneNumber,
+        dateOfBirth: fullUser.dateOfBirth ? fullUser.dateOfBirth : this.state.dateOfBirth,
+        workspace: fullUser.workspace ? fullUser.workspace : this.state.workspace,
+        isWorker: fullUser.isWorker ? fullUser.isWorker : this.state.isWorker,
+      })
+    }
+  }
+
+  static async getFullUserInfo(user) {
+    switch (user.role.id) {
+      case appConstants.roles.Admin.id:
+        return AdminApi.getAdmin(user.id);
+      case appConstants.roles.Teacher.id:
+        return TeacherApi.getTeacher(user.id);
+      default :
+        return StudentApi.getStudent(user.id);
+    }
+  }
+
   render() {
     const {open, handleClose} = this.props;
-    const {role} = this.state;
-    const roles = [
-      appConstants.roles.Admin,
-      appConstants.roles.Teacher,
-      appConstants.roles.Student];
+    const user = this.props.user;
+    if (!user) return <></>;
+    const role = user.role;
     return <Dialog
       open={open}
       onClose={handleClose}
     >
-      <DialogTitle>Create new user</DialogTitle>
+      <DialogTitle>Edit user</DialogTitle>
       <DialogContent>
-        <FormControl style={{
-          minWidth: 120,
-        }}>
-          <InputLabel >Role</InputLabel>
-          <Select
-            value={role}
-            onChange={this.handleRoleChange}
-          >
-            {roles.map(role =>
-              <MenuItem value={role} key={role.id}>
-                <em>{role.authority}</em>
-              </MenuItem>
-            )}
-          </Select>
-        </FormControl>
+        <TextField
+          margin="dense"
+          label="Role"
+          value={role.authority}
+          InputProps={{
+            readOnly: true,
+          }}
+          fullWidth
+        />
         {this.renderSpecificRoleForm(role)}
       </DialogContent>
       <DialogActions>
@@ -94,7 +108,7 @@ class AddUserForm extends React.Component {
           Cancel
         </Button>
         <Button onClick={this.handleSubmitButtonClick} color="primary">
-          Create new
+          Update
         </Button>
       </DialogActions>
     </Dialog>
@@ -102,9 +116,9 @@ class AddUserForm extends React.Component {
 
   renderSpecificRoleForm(role) {
     switch (role.id) {
-      case 1:
+      case appConstants.roles.Admin.id:
         return this.renderAdminForm();
-      case 2:
+      case appConstants.roles.Teacher.id:
         return this.renderTeacherForm();
       default :
         return this.renderStudentForm();
@@ -112,18 +126,18 @@ class AddUserForm extends React.Component {
   }
 
   renderAdminForm() {
+    const {email, name} = this.state;
     return <>
       <TextField
-        autoFocus
         margin="dense"
-        id="email"
         label="Email"
+        value={email}
         onChange={this.handleEmailChange}
         fullWidth
       />
       <TextField
         margin="dense"
-        id="name"
+        value={name}
         onChange={this.handleNameChange}
         label="Name"
         fullWidth
@@ -132,51 +146,58 @@ class AddUserForm extends React.Component {
   }
 
   renderTeacherForm() {
+    const {dateOfBirth, phoneNumber} = this.state;
     return <>
       {this.renderAdminForm()}
       <TextField
         onChange={this.handleDateChange}
         label="Day of Birth"
         type="date"
-        id="date"
+        value={dateOfBirth}
         InputLabelProps={{
           shrink: true,
         }}
       />
       <TextField
-        margin="dense"
         type="number"
-        id="phoneNumber"
+        value={phoneNumber}
         onChange={this.handlePhoneNumberChange}
         label="Phone number"
         fullWidth
+        InputLabelProps={{
+          shrink: true,
+        }}
       />
     </>;
   }
 
   renderStudentForm() {
+    const {isWorker, workspace} = this.state;
     return <>
       {this.renderTeacherForm()}
       <FormControlLabel
         control={
           <Checkbox
-            checked={this.state.isWorker}
+            checked={!!isWorker}
             onChange={this.handleWorkerChange}
           />
         }
-        label="worker "
+        label="worker"
       />
       <TextField
         style={{marginTop: 0}}
         margin="dense"
         type="text"
-        id="workspace"
+        value={workspace}
         onChange={this.handleWorkspaceChange}
-        label="Workspace "
+        label="Workspace"
         fullWidth
+        InputLabelProps={{
+          shrink: true,
+        }}
       />
     </>;
   }
 }
 
-export default AddUserForm;
+export default EditUserForm;

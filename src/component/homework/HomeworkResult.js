@@ -12,6 +12,7 @@ import Chip from "@material-ui/core/Chip";
 import BottomNavigation from "@material-ui/core/BottomNavigation";
 import BottomNavigationAction from "@material-ui/core/BottomNavigationAction";
 import LineChart from "../common/chart/LineChart";
+import Typography from "@material-ui/core/Typography";
 
 class HomeworkResult extends React.Component {
   state = {
@@ -36,6 +37,7 @@ class HomeworkResult extends React.Component {
     const {homework} = this.props;
     const convertedHomeworkStudent = homeworkStudents.map(homeworkStudent => {
       homeworkStudent.completion = this.getCompletion(homeworkStudent.choices, homework);
+      homeworkStudent.result = this.getResult(homeworkStudent.choices, homework);
       return homeworkStudent
     });
     this.setState({homeworkStudents: convertedHomeworkStudent, tab: 0});
@@ -129,7 +131,7 @@ class HomeworkResult extends React.Component {
             const answer = choices[i];
             const correct = answer === question.correctAnswer;
             const color = !!(answer !== undefined) ? correct ? "primary" : "secondary" : "default";
-            return <TableCell><Chip color={color}/></TableCell>
+            return <TableCell key={i}><Chip color={color}/></TableCell>
           })}
         </TableRow>
       }}
@@ -138,10 +140,14 @@ class HomeworkResult extends React.Component {
 
   renderSummary = (homeworkStudents, homework) => {
     const studentNumber = homeworkStudents.length;
+    const questionNumber = homework.questions.length;
+    if (studentNumber === 0 || questionNumber === 0) {
+      return <Typography color="textSecondary" align="center">
+        There are no students or questions
+      </Typography>
+    }
     const sumCompletion = homeworkStudents.reduce((current, homeworkStudent) => current + homeworkStudent.completion, 0);
     const averageCompletion = sumCompletion / studentNumber;
-    const sumAccuracy = homeworkStudents.reduce((current, homeworkStudent) => current + homeworkStudent.result, 0);
-    const averageAccuracy = sumAccuracy / studentNumber;
 
     const correctAnswers = homework.questions
       .map((question, i) => {
@@ -151,9 +157,12 @@ class HomeworkResult extends React.Component {
         }, 0);
       })
       .concat(0);
-    const accuracyRate = correctAnswers.map(correctAnswer => correctAnswer * 100 / studentNumber);
 
-    const workedAnswers = homework.questions
+    const accuracyRate = correctAnswers.map(correctAnswer => correctAnswer * 100 / studentNumber);
+    const sumAccuracy = accuracyRate.reduce((current, answer) => current + answer, 0);
+    const averageAccuracy = sumAccuracy / questionNumber;
+
+    const completedAnswers = homework.questions
       .map((question, i) => {
         return homeworkStudents.reduce((count, homeworkStudent) => {
           const worked = homeworkStudent.choices[i] !== undefined;
@@ -161,10 +170,9 @@ class HomeworkResult extends React.Component {
         }, 0);
       })
       .concat(0);
-    const workedRate = workedAnswers.map(workedAnswer => workedAnswer * 100 / studentNumber);
+    const workedRate = completedAnswers.map(workedAnswer => workedAnswer * 100 / studentNumber);
 
-    console.log(correctAnswers);
-    const labels = [...Array(homework.questions.length).keys()].map(num => `Question ${num + 1}`);
+    const labels = [...Array(questionNumber).keys()].map(num => `Question ${num + 1}`);
 
     const chartData = {
       labels: labels,
@@ -208,6 +216,15 @@ class HomeworkResult extends React.Component {
   getCompletion = (choices, homework) => {
     if (!homework.questions || !homework.questions.length) return 0;
     return choices.length * 100 / homework.questions.length;
+  };
+
+  getResult = (choices, homework) => {
+    if (!homework.questions || !homework.questions.length) return 0;
+    const correctAnswerNumber = choices.reduce((result, choice, i, choices) => {
+      const correct = choice === homework.questions[i].correctAnswer;
+      return result + (correct ? 1 : 0);
+    }, 0);
+    return correctAnswerNumber * 100 / homework.questions.length;
   }
 }
 

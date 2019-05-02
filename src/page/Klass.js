@@ -4,6 +4,7 @@ import StudentContent from "../component/student/StudentContent";
 import ClassApi from "../api/ClassApi";
 import {Typography} from "@material-ui/core";
 import LessonContent from "../component/lesson/LessonContent";
+import appConstants from "../util/appConstants";
 
 class Klass extends React.Component {
   state = {
@@ -22,11 +23,18 @@ class Klass extends React.Component {
   async componentDidMount() {
     const klassId = this.props.match.params.klassId;
     const klass = await this.getClass(klassId);
+
+    const teacherId = this.props.location.state.teacherId;
+    if (teacherId && klass.teacher.id !== parseInt(teacherId)) {
+      this.props.history.push("/login");
+    }
+
     this.setState({klass})
   }
 
   render() {
     const {klass} = this.state;
+    const teacherId = this.props.location.state.teacherId;
     return (klass ?
       <CustomDrawer pageName={`Class  ${klass.name}`}
                     features={[
@@ -34,13 +42,17 @@ class Klass extends React.Component {
                         name: "Lessons of class",
                         path: "/student",
                         icon: "assessment",
-                        content: <LessonContent klass={klass}/>
+                        content: <LessonContent
+                          mode={!teacherId ? appConstants.modes.Admin : appConstants.modes.Teacher}
+                          klass={klass}/>
                       },
                       {
                         name: "Students of class",
                         path: "/student",
                         icon: "supervised_user_circle",
-                        content: <StudentContent klass={klass}/>
+                        content: <StudentContent
+                          mode={!teacherId ? appConstants.modes.Admin : appConstants.modes.Teacher}
+                          klass={klass}/>
                       },
                     ]}
                     {...this.props}

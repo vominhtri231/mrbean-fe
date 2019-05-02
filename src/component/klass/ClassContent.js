@@ -10,6 +10,8 @@ import StudentApi from "../../api/StudentApi";
 import TeacherApi from "../../api/TeacherApi";
 import PaginationTable from "../common/table/PaginationTable";
 import ClassDataRow from "./ClassDataRow";
+import ConfirmDialog from "../common/ConfirmDialog";
+import EditClassForm from "./EditClassForm";
 
 const styles = {
   fab: {
@@ -27,6 +29,8 @@ class ClassContent extends React.Component {
     klasses: [],
     teachers: [],
     openAddClassForm: false,
+    deletingKlass: undefined,
+    editingKlass: undefined,
   };
 
   handleOpenForm = () => {
@@ -38,7 +42,27 @@ class ClassContent extends React.Component {
   };
 
   handleOpenClassSpecific = (klassId) => {
-    this.props.history.push(`/class/${klassId}`);
+    const {teacherId} = this.props;
+    this.props.history.push({
+      pathname: `/class/${klassId}`,
+      state: {teacherId: teacherId}
+    });
+  };
+
+  handleOpenDeleteClassDialog = (klass) => {
+    this.setState({deletingKlass: klass});
+  };
+
+  handleCloseDeleteClassDialog = () => {
+    this.setState({deletingKlass: undefined});
+  };
+
+  handleOpenEditDialog = (klass) => {
+    this.setState({editingKlass: klass});
+  };
+
+  handleCloseEditDialog = () => {
+    this.setState({editingKlass: undefined});
   };
 
   search = (keyword) => {
@@ -64,6 +88,19 @@ class ClassContent extends React.Component {
       const addedKlasses = klasses.concat(response.data);
       this.setState({klasses: addedKlasses})
     })
+  };
+
+  updateClass = async (id, name, description, teacherId) => {
+    const response = await ClassApi.updateClass(id, name, description, teacherId);
+    const updatedKlass = response.data;
+    const {klasses} = this.state;
+    const updatedKlasses = klasses.map(klass => {
+      if (klass.id === updatedKlass.id) {
+        return updatedKlass;
+      }
+      return klass;
+    });
+    this.setState({klasses: updatedKlasses});
   };
 
   createStudentOfClass = async (students) => {
@@ -104,8 +141,12 @@ class ClassContent extends React.Component {
   };
 
   render() {
-    const {klasses, teachers, openAddClassForm} = this.state;
+    const {
+      klasses, teachers, openAddClassForm,
+      deletingKlass, editingKlass
+    } = this.state;
     const {classes, teacherId} = this.props;
+    const watchMode = !!teacherId;
     return (
       <div>
         <SearchBar searchPlaceHolder={"Search by class name or description"}
@@ -113,7 +154,7 @@ class ClassContent extends React.Component {
         <div>
           {this.renderListClasses(klasses)}
         </div>
-        {!teacherId && <>
+        {!watchMode && <>
           <Fab className={classes.fab} color='primary' onClick={this.handleOpenForm}>
             <AddIcon/>
           </Fab>
@@ -121,11 +162,25 @@ class ClassContent extends React.Component {
                         teachers={teachers}
                         handleClose={this.handleCloseForm}
                         handleSubmit={this.createClass}/></>}
+        {!!deletingKlass && <ConfirmDialog
+          open={!!deletingKlass}
+          title={`Do you want to delete class : ${deletingKlass.name}`}
+          handleSubmit={() => this.deleteClass(deletingKlass.id)}
+          handleClose={this.handleCloseDeleteClassDialog}
+        />}
+        <EditClassForm
+          open={!!editingKlass}
+          teachers={teachers}
+          klass={editingKlass}
+          handleClose={this.handleCloseEditDialog}
+          handleSubmit={this.updateClass}/>
       </div>
     );
   }
 
   renderListClasses = (klasses) => {
+    const {teacherId} = this.props;
+    const watchMode = !!teacherId;
     if (klasses.every(klass => klass.hide)) {
       return (
         <Typography color="textSecondary" align="center">
@@ -139,12 +194,13 @@ class ClassContent extends React.Component {
         headers={["Name", "Description", "Teacher", ""]}
         renderRow={klass =>
           <ClassDataRow
+            watchMode={watchMode}
             key={klass.id}
             data={klass}
-            onDelete={this.deleteClass}
-            onOpenClassSpecific={() => this.handleOpenClassSpecific(klass.id)}
-          />
-        }
+            onDelete={this.handleOpenDeleteClassDialog}
+            onOpenClassSpecific={this.handleOpenClassSpecific}
+            onEdit={this.handleOpenEditDialog}
+          />}
       />
     )
   }

@@ -8,11 +8,12 @@ import PageviewIcon from "@material-ui/icons/Pageview"
 import AddIcon from "@material-ui/icons/Add"
 import Chip from "@material-ui/core/Chip";
 import DateUtils from "../../util/DateUtils";
+import appConstants from "../../util/appConstants";
 
 class LessonDataRow extends React.Component {
   render() {
     const {
-      data, onDelete, watchMode, onChoose,
+      data, onDelete, mode, onChoose,
       addHomework, editHomework, deleteHomework,
       doHomework, watchHomework
     } = this.props;
@@ -28,32 +29,41 @@ class LessonDataRow extends React.Component {
                 const over = today > homework.deathLine;
                 const ended = homework.ended;
                 const color = over ? ended ? "default" : "secondary" : "primary";
-                return watchMode ?
-                  <Chip key={homework.id}
-                            label={homework.name}
-                            style={chipStyle}
-                            onClick={!over ? () => doHomework(homework) : undefined}
-                            color={color}
-                  /> :
+                return mode === appConstants.modes.Student ?
                   <Chip key={homework.id}
                         label={homework.name}
                         style={chipStyle}
-                        onDelete={!homework.ended ? () => deleteHomework(homework) : undefined}
-                        onClick={ended ?
-                          () => watchHomework(homework) :
-                          () => editHomework(data.id, homework)}
+                        onClick={!over ? () => doHomework(homework) : undefined}
                         color={color}
-                  />
+                  /> :
+                  mode === appConstants.modes.Teacher ?
+                    <Chip key={homework.id}
+                          label={homework.name}
+                          style={chipStyle}
+                          onDelete={!homework.ended ? () => deleteHomework(homework) : undefined}
+                          onClick={ended ?
+                            () => watchHomework(homework) :
+                            () => editHomework(data.id, homework)}
+                          color={color}
+                    /> :
+                    <Chip key={homework.id}
+                          label={homework.name}
+                          style={chipStyle}
+                          onClick={ended ?
+                            () => watchHomework(homework) :
+                            () => editHomework(data.id, homework)}
+                          color={color}
+                    />
               }
             )}
           </>
           : "There are no homework yet"
         }
-        {!watchMode && <IconButton onClick={() => addHomework(data.id)}>
+        {mode === appConstants.modes.Teacher && <IconButton onClick={() => addHomework(data.id)}>
           <AddIcon/>
         </IconButton>}
       </TableCell>
-      {!watchMode ?
+      {mode === appConstants.modes.Teacher ?
         <TableCell>
           <IconButton aria-label="Delete"
                       onClick={() => onDelete(data)}>

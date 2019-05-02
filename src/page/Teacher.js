@@ -12,7 +12,7 @@ class Teacher extends React.Component {
                               name: "Class manager",
                               path: "/admin/class",
                               icon: "class",
-                              content: <ClassContent teacherId={teacherId}/>
+                              content: <ClassContent teacherId={teacherId} {...this.props}/>
                             },
                           ]}
                           {...this.props}/>

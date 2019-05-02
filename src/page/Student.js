@@ -4,6 +4,7 @@ import {Button, Typography} from "@material-ui/core";
 import LessonContent from "../component/lesson/LessonContent";
 import CustomDrawer from "../component/common/CustomDrawer";
 import ChooseClassForm from "../component/common/ChooseClassForm";
+import appConstants from "../util/appConstants";
 
 class Student extends React.Component {
   state = {
@@ -53,7 +54,8 @@ class Student extends React.Component {
                           name: "Lessons of class",
                           path: "/student",
                           icon: "assessment",
-                          content: <LessonContent klass={selectedKlass} watchMode studentId={studentId}/>
+                          content: <LessonContent klass={selectedKlass} mode={appConstants.modes.Student}
+                                                  studentId={studentId}/>
                         },
                       ]}
                       {...this.props}

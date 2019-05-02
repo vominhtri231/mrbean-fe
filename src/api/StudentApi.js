@@ -16,8 +16,29 @@ class StudentApi {
     })
   }
 
-  static getAllOfClass(klassId){
+  static getAll() {
+    return ApiCaller.get(`${baseUrl}/all`);
+  }
+
+  static getAllOfClass(klassId) {
     return ApiCaller.get(`${baseUrl}?klassId=${klassId}`);
+  }
+
+  static getStudent(id) {
+    return ApiCaller.get(`${baseUrl}/${id}`);
+  }
+
+  static updateStudent(id, email, name, phoneNumber, dateOfBirth, workspace, isWorker) {
+    return ApiCaller.update(`${baseUrl}`, {
+      id: id,
+      email: email,
+      name: name,
+      phoneNumber: phoneNumber,
+      dateOfBirth: dateOfBirth,
+      workspace: workspace,
+      isWorker: isWorker,
+      role: appConstants.roles.Student
+    })
   }
 }
 
