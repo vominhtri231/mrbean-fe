@@ -17,6 +17,7 @@ import HomeworkStudentApi from "../../api/HomeworkStudentApi";
 import HomeworkResult from "../homework/HomeworkResult";
 import appConstants from "../../util/appConstants";
 import HomeworkSpec from "../homework/HomeworkSpec";
+import HomeworkWorksheetResult from "../homework/HomeworkWorksheetResult";
 
 class LessonContent extends React.Component {
   state = {
@@ -313,12 +314,18 @@ class LessonContent extends React.Component {
   }
 
   renderStudentModeGadgets() {
-    const {selectedLesson, doingHomework, savedHomeworkStudent} = this.state;
+    const {selectedLesson, doingHomework, savedHomeworkStudent, watchingHomework} = this.state;
     return <>
       <LessonContentViewer
         open={!!selectedLesson}
         lesson={selectedLesson}
         handleClose={this.handleCloseEditForm}/>
+      {!!watchingHomework && <HomeworkWorksheetResult
+        open={!!watchingHomework}
+        homework={watchingHomework}
+        choices={savedHomeworkStudent[watchingHomework.id]}
+        handleClose={this.handleCloseWatchingResultHomeDialog}
+      />}
       {!!doingHomework && <HomeworkWorksheet
         open={!!doingHomework}
         homework={doingHomework}

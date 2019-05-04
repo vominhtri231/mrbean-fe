@@ -3,15 +3,18 @@ import Dialog from "@material-ui/core/Dialog";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import {IconButton, TextField} from "@material-ui/core";
-import QuestionAnswer from "./QuestionAnswer";
 import CloseIcon from "@material-ui/icons/Close"
+import QuestionResult from "./QuestionResult";
+import Typography from "@material-ui/core/Typography";
 
-class HomeworkSpec extends React.Component {
-  handleChooseChange = (index, choice) => {
-  };
-
+class HomeworkWorksheetResult extends React.Component {
   render() {
-    const {open, handleClose, homework} = this.props;
+    const {open, handleClose, homework, choices} = this.props;
+    const questions = homework.questions;
+    const name = homework.name;
+    const deathLine = homework.deathLine;
+    const ended = homework.ended;
+
     return <Dialog
       open={open}
       onClose={handleClose}
@@ -19,10 +22,9 @@ class HomeworkSpec extends React.Component {
     >
       <DialogTitle style={{backgroundColor: '#b7b38d', padding: '5px 20px 5px 20px'}}>
         <TextField
-          value={homework.name}
-          onChange={this.handleNameChange}
+          value={name}
           label={"Homework name"}
-          InputProps={{
+          InputLabelProps={{
             readOnly: true,
           }}
         />
@@ -30,12 +32,8 @@ class HomeworkSpec extends React.Component {
           style={{marginLeft: 20}}
           label="Death line"
           type="date"
-          value={homework.deathLine}
-          onChange={this.handleDeathLineChange}
+          value={deathLine}
           InputLabelProps={{
-            shrink: true,
-          }}
-          InputProps={{
             readOnly: true,
           }}
         />
@@ -44,16 +42,20 @@ class HomeworkSpec extends React.Component {
         </IconButton>
       </DialogTitle>
       <DialogContent style={{backgroundColor: '#d9dbdd'}}>
-        {homework.questions.map((question, i) =>
-          <QuestionAnswer
-            key={i}
-            index={i}
-            question={question}
-            chooseChange={this.handleChooseChange}/>)
+        {!choices ?
+          <Typography>You did not do this homework</Typography> :
+          questions.map((question, i) =>
+            <QuestionResult
+              key={i}
+              index={i}
+              correctAnswer={ended ? question.correctAnswer : undefined}
+              question={question}
+              choice={choices[i]}
+            />)
         }
       </DialogContent>
     </Dialog>
   }
 }
 
-export default HomeworkSpec;
+export default HomeworkWorksheetResult;

@@ -33,7 +33,9 @@ class LessonDataRow extends React.Component {
                   <Chip key={homework.id}
                         label={homework.name}
                         style={chipStyle}
-                        onClick={!over ? () => doHomework(homework) : undefined}
+                        onClick={!over ?
+                          () => doHomework(homework) :
+                          () => watchHomework(homework)}
                         color={color}
                   /> :
                   mode === appConstants.modes.Teacher ?
