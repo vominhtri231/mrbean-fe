@@ -18,6 +18,11 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import {Icon} from "@material-ui/core";
 import Paper from "@material-ui/core/Paper";
+import Menu from "@material-ui/core/Menu";
+import MenuItem from "@material-ui/core/MenuItem";
+import AccountCircle from '@material-ui/icons/AccountCircle';
+import EditUserForm from "../user/EditUserForm";
+import App from "../../App";
 
 const drawerWidth = 270;
 
@@ -89,7 +94,9 @@ const styles = theme => ({
 class CustomDrawer extends React.Component {
   state = {
     open: false,
-    currentFeatureIndex: 0
+    currentFeatureIndex: 0,
+    openProfileMenu: null,
+    openProfileDialog: false,
   };
 
   handleDrawerOpen = () => {
@@ -104,12 +111,37 @@ class CustomDrawer extends React.Component {
     this.setState({currentFeatureIndex: index});
   };
 
-  render() {
-    const {classes, theme, children} = this.props;
-    const {pageName, features} = this.props;
-    const {currentFeatureIndex} = this.state;
-    const ContentComponent = features[currentFeatureIndex].content;
+  handleOpenProfileMenu = (event) => {
+    this.setState({openProfileMenu: event.currentTarget})
+  };
 
+  handleCloseProfileMenu = () => {
+    this.setState({openProfileMenu: null})
+  };
+
+  handleLogout = () => {
+    const {logout} = this.props;
+    logout();
+    this.props.history.push("/login");
+  };
+
+  handleOpenProfileDialog = () => {
+    this.handleCloseProfileMenu();
+    this.setState({openProfileDialog: true});
+  };
+
+  handleCloseProfileDialog = () => {
+    this.handleCloseProfileMenu();
+    this.setState({openProfileDialog: false});
+  };
+
+
+  render() {
+    const {classes, theme, children, user, editUser} = this.props;
+    //if (!user) return <Redirect to="/login"/>;
+    const {pageName, features} = this.props;
+    const {currentFeatureIndex, openProfileMenu, openProfileDialog} = this.state;
+    const ContentComponent = features[currentFeatureIndex].content;
     return (
       <div className={classes.root}>
         <CssBaseline/>
@@ -134,6 +166,35 @@ class CustomDrawer extends React.Component {
               {pageName}
             </Typography>
             {!!children && children}
+            {!!user && (
+              <div>
+                <IconButton
+                  aria-owns={!!openProfileMenu ? 'menu-appbar' : undefined}
+                  aria-haspopup="true"
+                  onClick={this.handleOpenProfileMenu}
+                  color="inherit"
+                >
+                  <AccountCircle/>
+                </IconButton>
+                <Menu
+                  id="menu-appbar"
+                  anchorEl={openProfileMenu}
+                  anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                  }}
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                  }}
+                  open={!!openProfileMenu}
+                  onClose={this.handleCloseProfileMenu}
+                >
+                  <MenuItem onClick={this.handleOpenProfileDialog}>Profile</MenuItem>
+                  <MenuItem onClick={this.handleLogout}>Logout</MenuItem>
+                </Menu>
+              </div>
+            )}
           </Toolbar>
         </AppBar>
         <Drawer
@@ -176,6 +237,12 @@ class CustomDrawer extends React.Component {
             {ContentComponent}
           </Paper>
         </main>
+        {!App.isEmpty(user) && <EditUserForm
+          user={user}
+          open={openProfileDialog}
+          handleClose={this.handleCloseProfileDialog}
+          handleSubmit={editUser}
+        />}
       </div>
     );
   }

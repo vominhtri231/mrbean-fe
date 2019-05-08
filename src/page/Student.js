@@ -5,6 +5,7 @@ import LessonContent from "../component/lesson/LessonContent";
 import CustomDrawer from "../component/common/CustomDrawer";
 import ChooseClassForm from "../component/common/ChooseClassForm";
 import appConstants from "../util/appConstants";
+import App from "../App";
 
 class Student extends React.Component {
   state = {
@@ -37,28 +38,41 @@ class Student extends React.Component {
   }
 
   async componentDidMount() {
-    const studentId = this.props.match.params.studentId;
+    const studentId = this.props.user.id;
     const klasses = await this.getClassesOfStudent(studentId);
     const selectedKlass = klasses.length > 0 ? klasses[0] : undefined;
     this.setState({klasses, selectedKlass})
   }
 
+  componentDidUpdate(prevProps) {
+    if (JSON.stringify(prevProps.user) !== JSON.stringify(this.props.user)) {
+      const defaultPath = App.getDefaultPath(this.props.user);
+      if (!!defaultPath && defaultPath !== "/student") {
+        this.props.history.push(defaultPath);
+      }
+    }
+  }
+
   render() {
+    const {user, editUser, logout} = this.props;
     const {klasses, openChangeKlass, selectedKlass} = this.state;
-    const studentId = this.props.match.params.studentId;
-    return (selectedKlass ?
+    return (selectedKlass && user && !App.isEmpty(user) ?
       <>
-        <CustomDrawer pageName={`${selectedKlass.name}`}
-                      features={[
-                        {
-                          name: "Lessons of class",
-                          path: "/student",
-                          icon: "assessment",
-                          content: <LessonContent klass={selectedKlass} mode={appConstants.modes.Student}
-                                                  studentId={studentId}/>
-                        },
-                      ]}
-                      {...this.props}
+        <CustomDrawer
+          pageName={`${selectedKlass.name}`}
+          user={user}
+          editUser={editUser}
+          logout={logout}
+          features={[
+            {
+              name: "Lessons of class",
+              path: "/student",
+              icon: "assessment",
+              content: <LessonContent klass={selectedKlass} mode={appConstants.modes.Student}
+                                      studentId={user.id}/>
+            },
+          ]}
+          {...this.props}
         >
           <Button
             style={{position: 'absolute', right: 30}}

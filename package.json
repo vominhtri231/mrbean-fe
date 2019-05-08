@@ -10,6 +10,7 @@
     "draft-js": "^0.10.5",
     "draft-js-editor": "^1.12.4",
     "draft-js-plugins-editor": "^2.1.1",
+    "qs": "^6.7.0",
     "react": "^16.8.4",
     "react-chartjs-2": "^2.7.6",
     "react-dom": "^16.8.4",

@@ -10,4 +10,5 @@ export default Object.freeze({
     Student: "student",
   },
   excelType: ".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel",
+  basicAccessToken: "bXktY2xpZW50Om15LXNlY3JldA==",
 })

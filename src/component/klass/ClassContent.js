@@ -42,11 +42,7 @@ class ClassContent extends React.Component {
   };
 
   handleOpenClassSpecific = (klassId) => {
-    const {teacherId} = this.props;
-    this.props.history.push({
-      pathname: `/class/${klassId}`,
-      state: {teacherId: teacherId}
-    });
+    this.props.history.push(`/class/${klassId}`);
   };
 
   handleOpenDeleteClassDialog = (klass) => {

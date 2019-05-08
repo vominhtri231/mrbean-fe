@@ -1,3 +1,5 @@
+import LocalStorageManager from "../util/LocalStorageManager";
+
 const apiUrl = "http://localhost:8080/api/";
 
 class ApiCaller {
@@ -18,9 +20,13 @@ class ApiCaller {
   }
 
   static sendRequest(url, body, method) {
+    const accessToken = LocalStorageManager.getAccessToken();
+    const bearer = `Bearer ${accessToken}`;
+    console.log(bearer);
     return fetch(apiUrl + url, {
       method,
       headers: {
+        Authorization: bearer,
         "Content-Type": "application/json",
       },
       body: body ? JSON.stringify(body) : undefined

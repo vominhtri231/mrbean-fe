@@ -54,20 +54,29 @@ class EditUserForm extends React.Component {
     this.setState({workspace: event.target.value})
   };
 
+  async componentDidMount() {
+    await this.init();
+  }
+
   async componentDidUpdate(prevProps) {
     if (JSON.stringify(this.props.user) !== JSON.stringify(prevProps.user) && this.props.user) {
-      const user = this.props.user;
-      const response = await EditUserForm.getFullUserInfo(user);
-      const fullUser = response.data;
-      this.setState({
-        email: fullUser.email,
-        name: fullUser.name,
-        phoneNumber: fullUser.phoneNumber ? fullUser.phoneNumber : this.state.phoneNumber,
-        dateOfBirth: fullUser.dateOfBirth ? fullUser.dateOfBirth : this.state.dateOfBirth,
-        workspace: fullUser.workspace ? fullUser.workspace : this.state.workspace,
-        isWorker: fullUser.isWorker ? fullUser.isWorker : this.state.isWorker,
-      })
+      await this.init();
     }
+  }
+
+  async init() {
+    const user = this.props.user;
+    const response = await EditUserForm.getFullUserInfo(user);
+    const fullUser = response.data;
+    console.log(fullUser);
+    this.setState({
+      email: fullUser.email,
+      name: fullUser.name,
+      phoneNumber: fullUser.phoneNumber ? fullUser.phoneNumber : this.state.phoneNumber,
+      dateOfBirth: fullUser.dateOfBirth ? fullUser.dateOfBirth : this.state.dateOfBirth,
+      workspace: fullUser.workspace ? fullUser.workspace : this.state.workspace,
+      isWorker: fullUser.isWorker ? fullUser.isWorker : this.state.isWorker,
+    })
   }
 
   static async getFullUserInfo(user) {

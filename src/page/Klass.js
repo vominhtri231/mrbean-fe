@@ -8,7 +8,8 @@ import appConstants from "../util/appConstants";
 
 class Klass extends React.Component {
   state = {
-    klass: undefined
+    klass: undefined,
+    mode: appConstants.modes.Teacher,
   };
 
   async getClass(klassId) {
@@ -23,39 +24,63 @@ class Klass extends React.Component {
   async componentDidMount() {
     const klassId = this.props.match.params.klassId;
     const klass = await this.getClass(klassId);
-
-    const teacherId = this.props.location.state.teacherId;
-    if (teacherId && klass.teacher.id !== parseInt(teacherId)) {
-      this.props.history.push("/login");
-    }
-
     this.setState({klass})
   }
 
+  async componentDidUpdate(prevProps) {
+    if (JSON.stringify(prevProps.user) !== JSON.stringify(this.props.user)) {
+      if (this.props.user.role.id === appConstants.roles.Student.id) {
+        this.props.history.push("/student");
+      }
+      switch (this.props.user.role.id) {
+        case appConstants.roles.Student.id:
+          this.props.history.push("/student");
+          return;
+        case appConstants.roles.Admin:
+          this.setState({mode: appConstants.modes.Teacher});
+          return;
+        case appConstants.roles.Teacher:
+          const pathKlassId = this.props.match.params.klassId;
+          const klasses = await ClassApi.getClassesOfTeacher();
+          const klassIds = klasses.map(klass => klass.id);
+          if (!klassIds.some(klassId => klassId === pathKlassId)) {
+            this.props.history.push("/teacher");
+          }
+          return;
+        default:
+          this.props.history.push("/login");
+      }
+    }
+  }
+
   render() {
-    const {klass} = this.state;
-    const teacherId = this.props.location.state.teacherId;
+    const {klass, mode} = this.state;
+    const {user, editUser, logout} = this.props;
     return (klass ?
-      <CustomDrawer pageName={`Class  ${klass.name}`}
-                    features={[
-                      {
-                        name: "Lessons of class",
-                        path: "/student",
-                        icon: "assessment",
-                        content: <LessonContent
-                          mode={!teacherId ? appConstants.modes.Admin : appConstants.modes.Teacher}
-                          klass={klass}/>
-                      },
-                      {
-                        name: "Students of class",
-                        path: "/student",
-                        icon: "supervised_user_circle",
-                        content: <StudentContent
-                          mode={!teacherId ? appConstants.modes.Admin : appConstants.modes.Teacher}
-                          klass={klass}/>
-                      },
-                    ]}
-                    {...this.props}
+      <CustomDrawer
+        pageName={`Class  ${klass.name}`}
+        user={user}
+        editUser={editUser}
+        logout={logout}
+        features={[
+          {
+            name: "Lessons of class",
+            path: "/student",
+            icon: "assessment",
+            content: <LessonContent
+              mode={mode}
+              klass={klass}/>
+          },
+          {
+            name: "Students of class",
+            path: "/student",
+            icon: "supervised_user_circle",
+            content: <StudentContent
+              mode={mode}
+              klass={klass}/>
+          },
+        ]}
+        {...this.props}
       /> :
       <>
         <Typography color="textSecondary" align="center">There no class </Typography>
