@@ -18,6 +18,7 @@ import HomeworkResult from "../homework/HomeworkResult";
 import appConstants from "../../util/appConstants";
 import HomeworkSpec from "../homework/HomeworkSpec";
 import HomeworkWorksheetResult from "../homework/HomeworkWorksheetResult";
+import DateUtils from "../../util/DateUtils";
 
 class LessonContent extends React.Component {
   state = {
@@ -127,11 +128,18 @@ class LessonContent extends React.Component {
       || lesson.description.toLowerCase().includes(lowerKeyword);
   };
 
-  createLesson = async (lessonNumber, description, content) => {
+  createLesson = async (lessonNumber, description, content, homeworkTemplateList) => {
     const {klass} = this.props;
     const {lessons} = this.state;
     const response = await LessonApi.createLesson(lessonNumber, description, content, klass.id);
-    const addedLessons = lessons.concat(response.data);
+    const lesson = response.data;
+    const addedLessons = lessons.concat(lesson);
+    if (homeworkTemplateList) {
+      const today = DateUtils.getCurrentDate();
+      homeworkTemplateList.map(homeworkTemplate => {
+        this.addHomework(homeworkTemplate.name, today, lesson.id, homeworkTemplate.questions)
+      })
+    }
     this.setState({lessons: addedLessons});
   };
 

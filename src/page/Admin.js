@@ -18,7 +18,6 @@ class Admin extends React.Component {
     const {user, editUser,logout} = this.props;
     return (user&&!App.isEmpty(user) ?
       <CustomDrawer
-        pageName={"Administrator page"}
         user={user}
         logout={logout}
         editUser={editUser}

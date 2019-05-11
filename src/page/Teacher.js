@@ -2,6 +2,7 @@ import React from 'react';
 import CustomDrawer from "../component/common/CustomDrawer"
 import ClassContent from "../component/klass/ClassContent";
 import App from "../App";
+import TemplateContent from "../component/template/TemplateContent";
 
 class Teacher extends React.Component {
   componentDidUpdate(prevProps) {
@@ -17,7 +18,6 @@ class Teacher extends React.Component {
     const {user, editUser, logout} = this.props;
     return (!App.isEmpty(user) ?
         <CustomDrawer
-          pageName={"Teacher page"}
           user={user}
           editUser={editUser}
           logout={logout}
@@ -27,6 +27,11 @@ class Teacher extends React.Component {
               icon: "class",
               content: <ClassContent teacherId={user.id} {...this.props}/>
             },
+            {
+              name:"Templates",
+              icon:"bookmarks",
+              content:<TemplateContent {...this.props}/>
+            }
           ]}
           {...this.props}/> : <></>
     )

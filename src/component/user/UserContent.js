@@ -156,8 +156,7 @@ class UserContent extends React.Component {
 
   componentDidMount() {
     this.getUsers();
-  }
-  ;
+  };
 
   render() {
     const {classes} = this.props;

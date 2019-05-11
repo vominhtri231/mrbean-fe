@@ -9,31 +9,25 @@ import {convertFromRaw, convertToRaw, EditorState} from "draft-js";
 import {FormControl} from "@material-ui/core";
 import ContentEditor from "../common/ContentEditor";
 import FormLabel from "@material-ui/core/FormLabel";
-import EditorContentUtils from "../../util/EditorContentUtils";
 
-class EditLessonForm extends React.Component {
+class EditLessonTemplateForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      lessonNumber: "",
       description: "",
       content: EditorState.createEmpty()
     };
   }
 
   handleSubmitButtonClick = async () => {
-    const {lessonNumber, description, content} = this.state;
+    const {description, content} = this.state;
     const {handleClose, handleSubmit, lesson} = this.props;
     if (!lesson) return;
-    handleSubmit(lessonNumber, description, this.convertLessonContent(content), lesson.id);
+    handleSubmit(lesson.id, description, this.convertLessonContent(content));
     handleClose();
   };
 
   convertLessonContent = (content) => JSON.stringify(convertToRaw(content.getCurrentContent()));
-
-  handleLessonNumberChange = (event) => {
-    this.setState({lessonNumber: event.target.value});
-  };
 
   handleDescriptionChange = (event) => {
     this.setState({description: event.target.value});
@@ -47,38 +41,33 @@ class EditLessonForm extends React.Component {
     if (JSON.stringify(this.props.lesson) !== JSON.stringify(prevProps.lesson) && this.props.lesson) {
       const lesson = this.props.lesson;
       this.setState({
-        lessonNumber: lesson.lessonNumber,
         description: lesson.description,
-        content: EditorContentUtils.convertToEditorContent(lesson.content)
+        content: this.convertToEditorContent(lesson.content)
       })
     }
   }
 
+  convertToEditorContent = (value) => {
+    if (!value) return EditorState.createEmpty();
+    const convertedState = convertFromRaw(JSON.parse(value))
+    return EditorState.createWithContent(convertedState);
+  };
+
   render() {
     const {open, handleClose} = this.props;
-    const {lessonNumber, description, content} = this.state;
+    const {description, content} = this.state;
 
     return <Dialog
       open={open}
       fullScreen
       onClose={handleClose}
     >
-      <DialogTitle>Edit lesson</DialogTitle>
+      <DialogTitle>Edit lesson template</DialogTitle>
       <DialogContent>
         <form style={{
           display: 'flex',
           flexWrap: 'wrap',
         }}>
-          <TextField
-            type="number"
-            autoFocus
-            margin="dense"
-            id="lessonNumber"
-            label="Lesson number"
-            value={lessonNumber}
-            onChange={this.handleLessonNumberChange}
-            fullWidth
-          />
           <TextField
             margin="dense"
             id="description"
@@ -110,4 +99,4 @@ class EditLessonForm extends React.Component {
 
 }
 
-export default EditLessonForm
+export default EditLessonTemplateForm

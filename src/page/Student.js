@@ -68,8 +68,10 @@ class Student extends React.Component {
               name: "Lessons of class",
               path: "/student",
               icon: "assessment",
-              content: <LessonContent klass={selectedKlass} mode={appConstants.modes.Student}
-                                      studentId={user.id}/>
+              content: <LessonContent
+                klass={selectedKlass}
+                mode={appConstants.modes.Student}
+                studentId={user.id}/>
             },
           ]}
           {...this.props}

@@ -22,7 +22,6 @@ class ApiCaller {
   static sendRequest(url, body, method) {
     const accessToken = LocalStorageManager.getAccessToken();
     const bearer = `Bearer ${accessToken}`;
-    console.log(bearer);
     return fetch(apiUrl + url, {
       method,
       headers: {

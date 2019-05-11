@@ -126,13 +126,13 @@ class CustomDrawer extends React.Component {
   };
 
   handleOpenProfileDialog = () => {
-    this.handleCloseProfileMenu();
     this.setState({openProfileDialog: true});
+    this.handleCloseProfileMenu();
   };
 
   handleCloseProfileDialog = () => {
-    this.handleCloseProfileMenu();
     this.setState({openProfileDialog: false});
+    this.handleCloseProfileMenu();
   };
 
 
@@ -167,7 +167,8 @@ class CustomDrawer extends React.Component {
             </Typography>
             {!!children && children}
             {!!user && (
-              <div>
+              <div style={{position: 'absolute', right: 20}}>
+                {user.email}
                 <IconButton
                   aria-owns={!!openProfileMenu ? 'menu-appbar' : undefined}
                   aria-haspopup="true"

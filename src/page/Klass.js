@@ -9,7 +9,6 @@ import appConstants from "../util/appConstants";
 class Klass extends React.Component {
   state = {
     klass: undefined,
-    mode: appConstants.modes.Teacher,
   };
 
   async getClass(klassId) {
@@ -24,41 +23,47 @@ class Klass extends React.Component {
   async componentDidMount() {
     const klassId = this.props.match.params.klassId;
     const klass = await this.getClass(klassId);
-    this.setState({klass})
+    this.setState({klass});
   }
 
   async componentDidUpdate(prevProps) {
     if (JSON.stringify(prevProps.user) !== JSON.stringify(this.props.user)) {
-      if (this.props.user.role.id === appConstants.roles.Student.id) {
+      console.log(this.props.user);
+      await this.init();
+    }
+  }
+
+  async init() {
+    if (this.props.user.role.id === appConstants.roles.Student.id) {
+      this.props.history.push("/student");
+    }
+    switch (this.props.user.role.id) {
+      case appConstants.roles.Student.id:
         this.props.history.push("/student");
-      }
-      switch (this.props.user.role.id) {
-        case appConstants.roles.Student.id:
-          this.props.history.push("/student");
-          return;
-        case appConstants.roles.Admin:
-          this.setState({mode: appConstants.modes.Teacher});
-          return;
-        case appConstants.roles.Teacher:
-          const pathKlassId = this.props.match.params.klassId;
-          const klasses = await ClassApi.getClassesOfTeacher();
-          const klassIds = klasses.map(klass => klass.id);
-          if (!klassIds.some(klassId => klassId === pathKlassId)) {
-            this.props.history.push("/teacher");
-          }
-          return;
-        default:
-          this.props.history.push("/login");
-      }
+        return;
+      case appConstants.roles.Admin:
+        return;
+      case appConstants.roles.Teacher:
+        const pathKlassId = this.props.match.params.klassId;
+        const klasses = await ClassApi.getClassesOfTeacher();
+        const klassIds = klasses.map(klass => klass.id);
+        if (!klassIds.some(klassId => klassId === pathKlassId)) {
+          this.props.history.push("/teacher");
+        }
+        return;
+      default:
+        this.props.history.push("/login");
     }
   }
 
   render() {
-    const {klass, mode} = this.state;
+    const {klass} = this.state;
     const {user, editUser, logout} = this.props;
+    if (!user || !user.role) return <></>;
+    const mode = user.role.authority;
     return (klass ?
       <CustomDrawer
-        pageName={`Class  ${klass.name}`}
+        pageName={`${klass.name}`}
         user={user}
         editUser={editUser}
         logout={logout}

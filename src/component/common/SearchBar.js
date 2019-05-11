@@ -29,11 +29,12 @@ class SearchBar extends React.Component {
   };
 
   render() {
-    const {classes, searchPlaceHolder, children} = this.props;
+    const {classes, searchPlaceHolder, children, style} = this.props;
     return (
-      <AppBar className={classes.searchBar} position="static" color="default" elevation={0}>
-        <Toolbar>
-          <Grid container spacing={16} alignItems="center">
+      <AppBar className={classes.searchBar} style={style}
+              position="static" color="default" elevation={0}>
+        <Toolbar style={{minHeight:"0px"}}>
+          <Grid container spacing={16} alignItems="center" >
             <Grid item>
               <SearchIcon className={classes.block} color="inherit"/>
             </Grid>

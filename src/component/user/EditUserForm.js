@@ -66,9 +66,9 @@ class EditUserForm extends React.Component {
 
   async init() {
     const user = this.props.user;
+    if (!user) return;
     const response = await EditUserForm.getFullUserInfo(user);
     const fullUser = response.data;
-    console.log(fullUser);
     this.setState({
       email: fullUser.email,
       name: fullUser.name,

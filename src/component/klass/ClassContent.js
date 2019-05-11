@@ -46,19 +46,19 @@ class ClassContent extends React.Component {
   };
 
   handleOpenDeleteClassDialog = (klass) => {
-    this.setState({deletingKlass: klass});
+    this.setState({deletingKlassTemplate: klass});
   };
 
   handleCloseDeleteClassDialog = () => {
-    this.setState({deletingKlass: undefined});
+    this.setState({deletingKlassTemplate: undefined});
   };
 
   handleOpenEditDialog = (klass) => {
-    this.setState({editingKlass: klass});
+    this.setState({editingKlassTemplate: klass});
   };
 
   handleCloseEditDialog = () => {
-    this.setState({editingKlass: undefined});
+    this.setState({editingKlassTemplate: undefined});
   };
 
   search = (keyword) => {
@@ -106,7 +106,6 @@ class ClassContent extends React.Component {
           student.dateOfBirth, student.workspace, student.isWorker);
         return responseStudent.data.id;
       } catch (e) {
-        console.log(e);
       }
     }));
   };
