@@ -256,7 +256,7 @@ class LessonContent extends React.Component {
     await this.init()
   }
 
-  async init() {
+  init = async () => {
     const {klass, studentId} = this.props;
     const response = await LessonApi.getAllOfClass(klass.id);
     const lessons = response.data;
@@ -276,7 +276,8 @@ class LessonContent extends React.Component {
     const {mode} = this.props;
     return <div>
       <SearchBar searchPlaceHolder={"Search by lesson number or description "}
-                 onSearch={this.search}/>
+                 onSearch={this.search}
+                 onReload={this.init}/>
       <div>
         {this.renderLessons()}
       </div>

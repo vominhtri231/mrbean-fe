@@ -59,11 +59,12 @@ class UserPageSearchBar extends React.Component {
   }
 
   render() {
-    const {searchPlaceHolder, classes} = this.props;
+    const {searchPlaceHolder, classes, onReload} = this.props;
     const {checkRoles} = this.state;
     return (
       <SearchBar searchPlaceHolder={searchPlaceHolder}
-                 onSearch={this.handleKeywordChange}>
+                 onSearch={this.handleKeywordChange}
+                 onReload={onReload}>
         <FormControl className={classes.formControl}>
           <InputLabel htmlFor="select-multiple">Roles</InputLabel>
           <Select

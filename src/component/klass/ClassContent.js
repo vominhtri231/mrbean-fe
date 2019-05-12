@@ -130,6 +130,10 @@ class ClassContent extends React.Component {
   };
 
   componentDidMount() {
+    this.init();
+  };
+
+  init = () => {
     const {teacherId} = this.props;
     this.getClasses(teacherId);
     this.getTeachers();
@@ -145,7 +149,7 @@ class ClassContent extends React.Component {
     return (
       <div>
         <SearchBar searchPlaceHolder={"Search by class name or description"}
-                   onSearch={this.search}/>
+                   onSearch={this.search} onReload={this.init}/>
         <div>
           {this.renderListClasses(klasses)}
         </div>

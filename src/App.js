@@ -4,7 +4,6 @@ import Login from "./page/Login"
 import Admin from "./page/Admin"
 import Teacher from "./page/Teacher"
 import Student from "./page/Student"
-import './App.css';
 import Klass from "./page/Klass";
 import UserProfileApi from "./api/UserProfileApi";
 import appConstants from "./util/appConstants";

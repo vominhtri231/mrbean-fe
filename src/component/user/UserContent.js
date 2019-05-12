@@ -167,7 +167,7 @@ class UserContent extends React.Component {
     return <div>
       <UserPageSearchBar
         searchPlaceHolder={'Search by email'}
-        onSearch={this.search}/>
+        onSearch={this.search} onReload={this.getUsers}/>
       <div className={classes.contentWrapper}>
         {this.renderUsers(users)}
       </div>

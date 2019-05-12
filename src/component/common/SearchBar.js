@@ -29,12 +29,12 @@ class SearchBar extends React.Component {
   };
 
   render() {
-    const {classes, searchPlaceHolder, children, style} = this.props;
+    const {classes, searchPlaceHolder, children, style, onReload} = this.props;
     return (
       <AppBar className={classes.searchBar} style={style}
               position="static" color="default" elevation={0}>
-        <Toolbar style={{minHeight:"0px"}}>
-          <Grid container spacing={16} alignItems="center" >
+        <Toolbar style={{minHeight: "0px"}}>
+          <Grid container spacing={16} alignItems="center">
             <Grid item>
               <SearchIcon className={classes.block} color="inherit"/>
             </Grid>
@@ -55,7 +55,7 @@ class SearchBar extends React.Component {
                 display: 'inline'
               }}>{children}</div> : undefined}
               <Tooltip title="Reload">
-                <IconButton>
+                <IconButton onClick={onReload}>
                   <RefreshIcon className={classes.block} color="inherit"/>
                 </IconButton>
               </Tooltip>

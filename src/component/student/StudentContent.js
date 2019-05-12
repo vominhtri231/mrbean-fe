@@ -69,17 +69,21 @@ class StudentContent extends React.Component {
   };
 
   async componentDidMount() {
+    await this.init();
+  }
+
+  init = async () => {
     const {klass} = this.props;
     const response = await StudentApi.getAllOfClass(klass.id);
     this.setState({students: response.data});
-  }
+  };
 
   render() {
     const {students} = this.state;
     const {mode} = this.props;
     return <div>
       <SearchBar searchPlaceHolder={"Search by name "}
-                 onSearch={this.search}/>
+                 onSearch={this.search} onReload={this.init}/>
       <div>
         {this.renderStudents(students)}
       </div>

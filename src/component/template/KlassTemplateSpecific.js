@@ -187,11 +187,11 @@ class KlassTemplateSpecific extends React.Component {
     }
   }
 
-  async init() {
+  init = async () => {
     const {klassTemplate} = this.props;
     const response = await LessonTemplateApi.getAllOfClass(klassTemplate.id);
     this.setState({lessonTemplateDetails: response.data})
-  }
+  };
 
   render() {
     const {open, handleClose, klassTemplate} = this.props;
@@ -212,8 +212,8 @@ class KlassTemplateSpecific extends React.Component {
         </IconButton>
         {`Template: ${klassTemplate.name}`}
         <SearchBar searchPlaceHolder={"Search by description"}
-                   onSearch={this.search}
-                   style={{width: '500px', display: 'inline-block', marginLeft: '30px'}}/>
+                   onSearch={this.search} onReload={this.init}
+                   style={{width: '500px', display: 'inline-block', marginLeft: '50px'}}/>
       </DialogTitle>
       <DialogContent>
         {this.renderKlassTemplates(lessonTemplateDetails)}

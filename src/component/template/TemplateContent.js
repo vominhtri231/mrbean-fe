@@ -128,7 +128,7 @@ class TemplateContent extends React.Component {
     return (
       <div>
         <SearchBar searchPlaceHolder={"Search by template name"}
-                   onSearch={this.search}/>
+                   onSearch={this.search} onReload={this.getKlassTemplates}/>
         <div>
           {this.renderKlassTemplates(klassTemplates)}
         </div>

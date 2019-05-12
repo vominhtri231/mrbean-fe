@@ -77,7 +77,7 @@ class Student extends React.Component {
           {...this.props}
         >
           <Button
-            style={{position: 'absolute', right: 30}}
+            style={{marginLeft: 30}}
             variant="contained" color="secondary"
             onClick={this.handleChangeClassOpen}>
             Change class
