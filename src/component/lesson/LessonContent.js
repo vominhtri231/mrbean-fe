@@ -138,6 +138,7 @@ class LessonContent extends React.Component {
       const today = DateUtils.getCurrentDate();
       homeworkTemplateList.map(homeworkTemplate => {
         this.addHomework(homeworkTemplate.name, today, lesson.id, homeworkTemplate.questions)
+        return undefined;
       })
     }
     this.setState({lessons: addedLessons});
@@ -270,7 +271,7 @@ class LessonContent extends React.Component {
         .reduce((homeworkIds, homeworkIdsOfLessons) => homeworkIdsOfLessons.concat(homeworkIds), []);
       await this.getHomeworkStudents(homeworkIdsOfLessons, studentId)
     }
-  }
+  };
 
   render() {
     const {mode} = this.props;

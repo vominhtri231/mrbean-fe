@@ -5,7 +5,7 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import {convertFromRaw, convertToRaw, EditorState} from "draft-js";
+import {convertToRaw, EditorState} from "draft-js";
 import {FormControl} from "@material-ui/core";
 import ContentEditor from "../common/ContentEditor";
 import FormLabel from "@material-ui/core/FormLabel";

@@ -50,7 +50,8 @@ class AddStudentToClassForm extends React.Component {
           <AutoCompete placeholder={"Student's email"}
                        onChange={this.handleSelectedStudentChange}
                        value={selectedStudents}
-                       suggestions={suggestions}/>
+                       suggestions={suggestions}
+                       isMulti/>
         </FormControl>
       </DialogContent>
       <DialogActions>

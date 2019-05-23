@@ -5,6 +5,7 @@ import ClassApi from "../api/ClassApi";
 import {Typography} from "@material-ui/core";
 import LessonContent from "../component/lesson/LessonContent";
 import appConstants from "../util/appConstants";
+import MistakeContent from "../component/mistake/MistakeContent";
 
 class Klass extends React.Component {
   state = {
@@ -28,7 +29,6 @@ class Klass extends React.Component {
 
   async componentDidUpdate(prevProps) {
     if (JSON.stringify(prevProps.user) !== JSON.stringify(this.props.user)) {
-      console.log(this.props.user);
       await this.init();
     }
   }
@@ -84,6 +84,13 @@ class Klass extends React.Component {
               mode={mode}
               klass={klass}/>
           },
+          {
+            name: "Mistakes of class",
+            path: "/mistake",
+            icon: "error",
+            content: <MistakeContent
+              klass={klass}/>
+          }
         ]}
         {...this.props}
       /> :

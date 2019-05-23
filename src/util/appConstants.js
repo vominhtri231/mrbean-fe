@@ -9,6 +9,10 @@ export default Object.freeze({
     Teacher: "teacher",
     Student: "student",
   },
+  mistakeStandards: [
+    "CompleteRate",
+    "AccuracyRate",
+  ],
   excelType: ".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel",
   basicAccessToken: "bXktY2xpZW50Om15LXNlY3JldA==",
 })

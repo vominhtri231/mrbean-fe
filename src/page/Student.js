@@ -1,11 +1,13 @@
 import React from 'react';
 import ClassApi from "../api/ClassApi";
-import {Button, Typography} from "@material-ui/core";
+import {IconButton, Typography} from "@material-ui/core";
 import LessonContent from "../component/lesson/LessonContent";
 import CustomDrawer from "../component/common/CustomDrawer";
 import ChooseClassForm from "../component/common/ChooseClassForm";
 import appConstants from "../util/appConstants";
 import App from "../App";
+import StudentMistakeContent from "../component/mistake/StudentMistakeContent";
+import UnfoldMoreIcon from "@material-ui/icons/UnfoldMore"
 
 class Student extends React.Component {
   state = {
@@ -73,15 +75,22 @@ class Student extends React.Component {
                 mode={appConstants.modes.Student}
                 studentId={user.id}/>
             },
+            {
+              name: "Mistakes ",
+              path: "/student",
+              icon: "error",
+              content: <StudentMistakeContent
+                klass={selectedKlass}
+                studentId={user.id}/>
+            },
           ]}
           {...this.props}
         >
-          <Button
-            style={{marginLeft: 30}}
-            variant="contained" color="secondary"
-            onClick={this.handleChangeClassOpen}>
-            Change class
-          </Button>
+          <IconButton style={{marginLeft: 30}}
+                      onClick={this.handleChangeClassOpen}
+                      color="inherit">
+            <UnfoldMoreIcon/>
+          </IconButton>
         </CustomDrawer>
         <ChooseClassForm
           open={openChangeKlass}

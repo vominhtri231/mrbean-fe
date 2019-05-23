@@ -140,8 +140,8 @@ const components = {
 class AutoCompete extends React.Component {
   render() {
     const {
-      classes, theme, suggestions,
-      placeholder, onChange, value
+      classes, theme, suggestions, style,
+      placeholder, onChange, value, isMulti
     } = this.props;
 
     const selectStyles = {
@@ -155,7 +155,7 @@ class AutoCompete extends React.Component {
     };
 
     return (
-      <div className={classes.root}>
+      <div className={classes.root} style={style}>
         <NoSsr>
           <Select
             classes={classes}
@@ -171,7 +171,7 @@ class AutoCompete extends React.Component {
             value={value}
             onChange={onChange}
             placeholder={placeholder}
-            isMulti
+            isMulti={isMulti}
           />
         </NoSsr>
       </div>
