@@ -40,8 +40,8 @@ class MistakeApi {
     })
   }
 
-  static delete(id) {
-    ApiCaller.delete(`${baseUrl}/${id}`)
+  static deleteMistake(id) {
+    return ApiCaller.delete(`${baseUrl}/${id}`)
   }
 }
 

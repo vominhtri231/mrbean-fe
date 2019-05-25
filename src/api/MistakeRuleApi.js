@@ -30,7 +30,7 @@ class MistakeRuleApi {
   }
 
   static delete(id) {
-    ApiCaller.delete(`${baseUrl}/${id}`)
+    return ApiCaller.delete(`${baseUrl}/${id}`)
   }
 }
 

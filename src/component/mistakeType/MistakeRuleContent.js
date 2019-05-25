@@ -13,12 +13,14 @@ import MistakeRuleDataRow from "./MistakeRuleDataRow";
 import PaginationTable from "../common/table/PaginationTable";
 import ConfirmDialog from "../common/ConfirmDialog";
 import Typography from "@material-ui/core/Typography";
+import Announce from "../common/Annouce";
 
 class MistakeRuleContent extends React.Component {
   state = {
     mistakeRules: [],
     openAddMistakeRuleForm: false,
     deletingMistakeRule: undefined,
+    announce: undefined,
   };
 
   handleOpenDeleteMistakeRuleForm = (mistakeRule) => {
@@ -37,11 +39,20 @@ class MistakeRuleContent extends React.Component {
     this.setState({openAddMistakeRuleForm: false})
   };
 
-  addMistakeRule = async (standard, mistakeTypeId, threshold) => {
-    const response = await MistakeRuleApi.create(standard, mistakeTypeId, threshold);
-    const {mistakeRules} = this.state;
-    const addedMistakeRules = mistakeRules.concat(response.data);
-    this.setState({mistakeRules: this.setUpBorder(addedMistakeRules)});
+  handleCloseAnnounce = () => {
+    this.setState({announce: undefined});
+  };
+
+  addMistakeRule = (standard, mistakeTypeId, threshold) => {
+    MistakeRuleApi.create(standard, mistakeTypeId, threshold).then(response => {
+      const {mistakeRules} = this.state;
+      const addedMistakeRules = mistakeRules.concat(response.data);
+      const successAnnounce = {message: "Create mistake rule successfully", variant: "success"};
+      this.setState({mistakeRules: addedMistakeRules, announce: successAnnounce});
+    }).catch(response => {
+      const errorAnnounce = {message: "Create mistake rule fail :" + response.error, variant: "error"};
+      this.setState({announce: errorAnnounce})
+    })
   };
 
   editMistakeRule = async (mistakeRule) => {
@@ -52,49 +63,19 @@ class MistakeRuleContent extends React.Component {
 
     const updatedMistakeRules = mistakeRules.map(mistakeRule =>
       mistakeRule.id === updatedMistakeRule.id ? updatedMistakeRule : mistakeRule)
-    this.setState({mistakeRules: this.setUpBorder(updatedMistakeRules)});
+    this.setState({mistakeRules: updatedMistakeRules});
   };
 
-  moveUp = async (mistakeRule) => {
-    const {mistakeRules} = this.state;
-    const index = this.getIndex(mistakeRules, mistakeRule);
-    const swapMistakeRule = mistakeRules[index - 1];
-    const tempNumber = swapMistakeRule.number;
-    swapMistakeRule.number = mistakeRule.number;
-    mistakeRule.number = tempNumber;
-
-    await this.editMistakeRule(swapMistakeRule);
-    await this.editMistakeRule(mistakeRule);
-    await this.init();
-  };
-
-  moveDown = async (mistakeRule) => {
-    const {mistakeRules} = this.state;
-    const index = this.getIndex(mistakeRules, mistakeRule);
-    const swapMistakeRule = mistakeRules[index + 1];
-    const tempNumber = swapMistakeRule.number;
-    swapMistakeRule.number = mistakeRule.number;
-    mistakeRule.number = tempNumber;
-    await this.editMistakeRule(swapMistakeRule);
-    await this.editMistakeRule(mistakeRule);
-    await this.init();
-  };
-
-  getIndex = (mistakeRules, mistakeRule) => {
-    let i = 0;
-    for (; i < mistakeRules.length; i++) {
-      if (mistakeRules[i].id === mistakeRule.id) {
-        break;
-      }
-    }
-    return i;
-  };
-
-  deleteMistakeRule = async (id) => {
-    await MistakeRuleApi.delete(id);
-    const {mistakeRules} = this.state;
-    const deletedMistakeRules = mistakeRules.filter(mistakeRule => mistakeRule.id !== id);
-    this.setState({mistakeRules: this.setUpBorder(deletedMistakeRules)});
+  deleteMistakeRule = (id) => {
+    MistakeRuleApi.delete(id).then(() => {
+      const {mistakeRules} = this.state;
+      const deletedMistakeRules = mistakeRules.filter(mistakeRule => mistakeRule.id !== id);
+      const successAnnounce = {message: "Delete mistake rule successfully", variant: "success"};
+      this.setState({mistakeRules: deletedMistakeRules, announce: successAnnounce});
+    }).catch(response => {
+      const errorAnnounce = {message: "Delete mistake rule fail :" + response.error, variant: "error"};
+      this.setState({announce: errorAnnounce})
+    })
   };
 
   async componentDidMount() {
@@ -103,24 +84,14 @@ class MistakeRuleContent extends React.Component {
 
   async init() {
     const response = await MistakeRuleApi.getAll();
-    const mistakeRules = this.setUpBorder(response.data);
+    const mistakeRules = response.data;
     this.setState({mistakeRules});
   }
-
-  setUpBorder = (mistakeRules) => {
-    mistakeRules[mistakeRules.length - 1].bottom = true;
-    mistakeRules[0].top = true;
-    for (let i = 1; i < mistakeRules.length - 1; i++) {
-      mistakeRules[i].top = undefined;
-      mistakeRules.bottom = undefined;
-    }
-    return mistakeRules;
-  };
 
   render() {
     const standards = appConstants.mistakeStandards;
     const {open, handleClose, mistakeTypes} = this.props;
-    const {mistakeRules, openAddMistakeRuleForm, deletingMistakeRule} = this.state;
+    const {mistakeRules, openAddMistakeRuleForm, deletingMistakeRule, announce} = this.state;
     return <Dialog
       open={open}
       fullScreen
@@ -157,6 +128,10 @@ class MistakeRuleContent extends React.Component {
           handleSubmit={() => this.deleteMistakeRule(deletingMistakeRule.id)}
           handleClose={this.handleCloseDeleteMistakeRuleForm}
         />}
+        {!!announce && <Announce
+          message={announce.message} variant={announce.variant}
+          onClose={this.handleCloseAnnounce} open
+        />}
       </DialogContent>
     </Dialog>
   }
@@ -179,8 +154,6 @@ class MistakeRuleContent extends React.Component {
             data={mistakeRule}
             onDelete={this.handleOpenDeleteMistakeRuleForm}
             onEdit={this.editMistakeRule}
-            moveUp={this.moveUp}
-            moveDown={this.moveDown}
             standards={standards}
             mistakeTypes={mistakeTypes}/>
         }

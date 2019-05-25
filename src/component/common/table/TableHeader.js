@@ -4,7 +4,7 @@ import TableCell from "@material-ui/core/TableCell";
 export const TableHeader = withStyles(theme => ({
   head: {
     fontSize: 16,
-    backgroundColor: theme.palette.common.black,
+    backgroundColor: "#827979",
     color: theme.palette.common.white,
   },
 }))(TableCell);

@@ -12,6 +12,7 @@ import PaginationTable from "../common/table/PaginationTable";
 import ClassDataRow from "./ClassDataRow";
 import ConfirmDialog from "../common/ConfirmDialog";
 import EditClassForm from "./EditClassForm";
+import Announce from "../common/Annouce";
 
 const styles = {
   fab: {
@@ -31,6 +32,7 @@ class ClassContent extends React.Component {
     openAddClassForm: false,
     deletingKlass: undefined,
     editingKlass: undefined,
+    announce: undefined,
   };
 
   handleOpenForm = () => {
@@ -46,19 +48,23 @@ class ClassContent extends React.Component {
   };
 
   handleOpenDeleteClassDialog = (klass) => {
-    this.setState({deletingKlassTemplate: klass});
+    this.setState({deletingKlass: klass});
   };
 
   handleCloseDeleteClassDialog = () => {
-    this.setState({deletingKlassTemplate: undefined});
+    this.setState({deletingKlass: undefined});
   };
 
   handleOpenEditDialog = (klass) => {
-    this.setState({editingKlassTemplate: klass});
+    this.setState({editingKlass: klass});
   };
 
   handleCloseEditDialog = () => {
-    this.setState({editingKlassTemplate: undefined});
+    this.setState({editingKlass: undefined});
+  };
+
+  handleCloseAnnounce = () => {
+    this.setState({announce: undefined});
   };
 
   search = (keyword) => {
@@ -82,21 +88,31 @@ class ClassContent extends React.Component {
     ClassApi.createClass(name, description, teacherId, studentIds).then(response => {
       const {klasses} = this.state;
       const addedKlasses = klasses.concat(response.data);
-      this.setState({klasses: addedKlasses})
+      const createSuccessAnnounce = {message: "Create class successfully", variant: "success"};
+      this.setState({klasses: addedKlasses, announce: createSuccessAnnounce})
+    }).catch(response => {
+      const createErrorAnnounce = {message: "Create class fail :" + response.error, variant: "error"};
+      this.setState({announce: createErrorAnnounce})
     })
   };
 
   updateClass = async (id, name, description, teacherId) => {
-    const response = await ClassApi.updateClass(id, name, description, teacherId);
-    const updatedKlass = response.data;
-    const {klasses} = this.state;
-    const updatedKlasses = klasses.map(klass => {
-      if (klass.id === updatedKlass.id) {
-        return updatedKlass;
-      }
-      return klass;
-    });
-    this.setState({klasses: updatedKlasses});
+    try {
+      const response = await ClassApi.updateClass(id, name, description, teacherId);
+      const updatedKlass = response.data;
+      const {klasses} = this.state;
+      const updatedKlasses = klasses.map(klass => {
+        if (klass.id === updatedKlass.id) {
+          return updatedKlass;
+        }
+        return klass;
+      });
+      const updateSuccessAnnounce = {message: "Update class successfully", variant: "success"};
+      this.setState({klasses: updatedKlasses, announce: updateSuccessAnnounce});
+    } catch (response) {
+      const updateErrorAnnounce = {message: "Update class fail :" + response.error, variant: "error"};
+      this.setState({announce: updateErrorAnnounce})
+    }
   };
 
   createStudentOfClass = async (students) => {
@@ -105,7 +121,7 @@ class ClassContent extends React.Component {
         const responseStudent = await StudentApi.createStudent(student.email, student.name, student.phoneNumber,
           student.dateOfBirth, student.workspace, student.isWorker);
         return responseStudent.data.id;
-      } catch (e) {
+      } catch (response) {
       }
     }));
   };
@@ -125,8 +141,12 @@ class ClassContent extends React.Component {
     ClassApi.deleteClass(id).then(() => {
       const {klasses} = this.state;
       const deletedKlasses = klasses.filter(klass => klass.id !== id);
-      this.setState({klasses: deletedKlasses})
-    });
+      const deleteSuccessAnnounce = {message: "Delete class successfully", variant: "success"};
+      this.setState({klasses: deletedKlasses, announce: deleteSuccessAnnounce})
+    }).catch(response => {
+      const deleteErrorAnnounce = {message: "Delete class fail :" + response.error, variant: "error"};
+      this.setState({announce: deleteErrorAnnounce})
+    })
   };
 
   componentDidMount() {
@@ -142,7 +162,7 @@ class ClassContent extends React.Component {
   render() {
     const {
       klasses, teachers, openAddClassForm,
-      deletingKlass, editingKlass
+      deletingKlass, editingKlass, announce
     } = this.state;
     const {classes, teacherId} = this.props;
     const watchMode = !!teacherId;
@@ -166,6 +186,10 @@ class ClassContent extends React.Component {
           title={`Do you want to delete class : ${deletingKlass.name}`}
           handleSubmit={() => this.deleteClass(deletingKlass.id)}
           handleClose={this.handleCloseDeleteClassDialog}
+        />}
+        {!!announce && <Announce
+          message={announce.message} variant={announce.variant}
+          onClose={this.handleCloseAnnounce} open
         />}
         <EditClassForm
           open={!!editingKlass}

@@ -2,19 +2,19 @@ import React from "react";
 import UserApi from "../../api/UserApi";
 import Fab from "@material-ui/core/Fab";
 import AddIcon from "@material-ui/icons/Add"
-import UserListItem from "./UserListItem";
 import AddUserForm from "./AddUserForm";
 import AdminApi from "../../api/AdminApi";
 import TeacherApi from "../../api/TeacherApi";
 import StudentApi from "../../api/StudentApi";
 import UserPageSearchBar from "./UserPageSearchBar";
 import ConfirmDialog from "../common/ConfirmDialog";
-import List from "@material-ui/core/List";
 import Typography from "@material-ui/core/Typography";
 import Announce from "../common/Annouce";
 import EditUserForm from "./EditUserForm";
 import withStyles from "@material-ui/core/styles/withStyles";
 import appConstants from "../../util/appConstants";
+import PaginationTable from "../common/table/PaginationTable";
+import UserDataRow from "./UserDataRow";
 
 const styles = {
   fab: {
@@ -95,20 +95,26 @@ class UserContent extends React.Component {
     const addUserCallback = response => {
       const {users} = this.state;
       const addedUsers = users.concat(response.data);
-      this.setState({users: addedUsers});
+      const createSuccessAnnounce = {message: "Create user successfully", variant: "success"};
+      this.setState({users: addedUsers, announce: createSuccessAnnounce});
+    };
+    const createUserFailCallback = response => {
+      console.log(response);
+      const createFailAnnounce = {message: "Create user fail :" + response.error, variant: "error"};
+      this.setState({announce: createFailAnnounce});
     };
     switch (role.id) {
       case appConstants.roles.Admin.id:
         AdminApi.createAdmin(email, name)
-          .then(addUserCallback);
+          .then(addUserCallback).catch(createUserFailCallback);
         break;
       case appConstants.roles.Teacher.id:
         TeacherApi.createTeacher(email, name, phoneNumber, dateOfBirth)
-          .then(addUserCallback);
+          .then(addUserCallback).catch(createUserFailCallback);
         break;
       default:
         StudentApi.createStudent(email, name, phoneNumber, dateOfBirth, workspace, isWorker)
-          .then(addUserCallback);
+          .then(addUserCallback).catch(createUserFailCallback);
         break;
     }
   };
@@ -123,20 +129,25 @@ class UserContent extends React.Component {
         }
         return user;
       });
-      this.setState({users: updatedUsers});
+      const updateSuccessAnnounce = {message: "Update user successfully", variant: "success"};
+      this.setState({users: updatedUsers, announce: updateSuccessAnnounce});
+    };
+    const updateUserFailCallback = response => {
+      const updateFailAnnounce = {message: "Update user fail :" + response.error, variant: "error"};
+      this.setState({announce: updateFailAnnounce});
     };
     switch (role.id) {
       case appConstants.roles.Admin.id:
         AdminApi.updateAdmin(id, email, name)
-          .then(updateUserCallback);
+          .then(updateUserCallback).catch(updateUserFailCallback);
         break;
       case appConstants.roles.Teacher.id:
         TeacherApi.updateTeacher(id, email, name, phoneNumber, dateOfBirth)
-          .then(updateUserCallback);
+          .then(updateUserCallback).catch(updateUserFailCallback);
         break;
       default:
         StudentApi.updateStudent(id, email, name, phoneNumber, dateOfBirth, workspace, isWorker)
-          .then(updateUserCallback);
+          .then(updateUserCallback).catch(updateUserFailCallback);
         break;
     }
   };
@@ -146,7 +157,7 @@ class UserContent extends React.Component {
       await UserApi.deleteUser(id);
       const {users} = this.state;
       const deletedUsers = users.filter(user => user.id !== id);
-      const deleteSuccessAnnounce = {message: "Delete successfully", variant: "success"};
+      const deleteSuccessAnnounce = {message: "Delete user successfully", variant: "success"};
       this.setState({users: deletedUsers, announce: deleteSuccessAnnounce})
     } catch (e) {
       const deleteStudentErrorAnnounce = {message: "Student is in some class", variant: "error"};
@@ -203,15 +214,18 @@ class UserContent extends React.Component {
       )
     }
     return (
-      <List>
-        {
-          users.filter(user => !user.hide).map(user => (
-            <UserListItem key={user.id} user={user}
-                          onDelete={this.handleOpenDeleteUserDialog}
-                          onEdit={this.handleOpenEditUserDialog}/>
-          ))
+      <PaginationTable
+        data={users.filter(user => !user.hide)}
+        headers={["Email", "Role", ""]}
+        renderRow={user =>
+          <UserDataRow
+            key={user.id}
+            data={user}
+            onDelete={this.handleOpenDeleteUserDialog}
+            onEdit={this.handleOpenEditUserDialog}
+          />
         }
-      </List>
+      />
     )
   }
 

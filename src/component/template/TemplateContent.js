@@ -11,6 +11,7 @@ import KlassTemplateDataRow from "./KlassTemplateDataRow";
 import AddKlassTemplateForm from "./AddKlassTemplateForm";
 import EditKlassTemplateForm from "./EditKlassTemplateForm";
 import KlassTemplateSpecific from "./KlassTemplateSpecific";
+import Announce from "../common/Annouce";
 
 const styles = {
   fab: {
@@ -30,6 +31,7 @@ class TemplateContent extends React.Component {
     deletingKlassTemplate: undefined,
     editingKlassTemplate: undefined,
     watchingKlassTemplate: undefined,
+    announce: undefined,
   };
 
   handleOpenAddKlassTemplateForm = () => {
@@ -64,6 +66,10 @@ class TemplateContent extends React.Component {
     this.setState({watchingKlassTemplate: undefined});
   };
 
+  handleCloseAnnounce = () => {
+    this.setState({announce: undefined});
+  };
+
   search = (keyword) => {
     const {klassTemplates} = this.state;
     const searchedKlassTemplates = klassTemplates.map(klassTemplate => {
@@ -82,34 +88,47 @@ class TemplateContent extends React.Component {
     KlassTemplateApi.createKlassTemplate(name).then(response => {
       const {klassTemplates} = this.state;
       const addedKlassTemplates = klassTemplates.concat(response.data);
-      this.setState({klassTemplates: addedKlassTemplates})
+      const successAnnounce = {message: "Create template successfully", variant: "success"};
+      this.setState({klassTemplates: addedKlassTemplates, announce: successAnnounce})
+    }).catch(response => {
+      const errorAnnounce = {message: "Create template fail :" + response.error, variant: "error"};
+      this.setState({announce: errorAnnounce})
     })
   };
 
-  updateKlassTemplate = async (id, name) => {
-    const response = await KlassTemplateApi.updateKlassTemplate(id, name);
-    const updatedKlassTemplate = response.data;
-    const {klassTemplates} = this.state;
-    const updatedKlassTemplates = klassTemplates.map(klassTemplate => {
-      if (klassTemplate.id === updatedKlassTemplate.id) {
-        return updatedKlassTemplate;
-      }
-      return klassTemplate;
-    });
-    this.setState({klassTemplates: updatedKlassTemplates});
-  };
-
-  getKlassTemplates = async () => {
-    const response = await KlassTemplateApi.getKlassTemplates();
-    this.setState({klassTemplates: response.data})
+  updateKlassTemplate = (id, name) => {
+    KlassTemplateApi.updateKlassTemplate(id, name).then(response => {
+      const updatedKlassTemplate = response.data;
+      const {klassTemplates} = this.state;
+      const updatedKlassTemplates = klassTemplates.map(klassTemplate => {
+        if (klassTemplate.id === updatedKlassTemplate.id) {
+          return updatedKlassTemplate;
+        }
+        return klassTemplate;
+      });
+      const successAnnounce = {message: "Update template successfully", variant: "success"};
+      this.setState({klassTemplates: updatedKlassTemplates, announce: successAnnounce});
+    }).catch(response => {
+      const errorAnnounce = {message: "Update template fail :" + response.error, variant: "error"};
+      this.setState({announce: errorAnnounce})
+    })
   };
 
   deleteKlassTemplate = (id) => {
     KlassTemplateApi.deleteKlassTemplate(id).then(() => {
       const {klassTemplates} = this.state;
       const deletedKlassTemplates = klassTemplates.filter(klassTemplate => klassTemplate.id !== id);
-      this.setState({klassTemplates: deletedKlassTemplates})
-    });
+      const successAnnounce = {message: "Delete template successfully", variant: "success"};
+      this.setState({klassTemplates: deletedKlassTemplates, announce: successAnnounce})
+    }).catch(response => {
+      const errorAnnounce = {message: "Delete template fail :" + response.error, variant: "error"};
+      this.setState({announce: errorAnnounce})
+    })
+  };
+
+  getKlassTemplates = async () => {
+    const response = await KlassTemplateApi.getKlassTemplates();
+    this.setState({klassTemplates: response.data})
   };
 
   async componentDidMount() {
@@ -118,11 +137,8 @@ class TemplateContent extends React.Component {
 
   render() {
     const {
-      klassTemplates,
-      openAddKlassTemplateForm,
-      deletingKlassTemplate,
-      editingKlassTemplate,
-      watchingKlassTemplate,
+      klassTemplates, openAddKlassTemplateForm, deletingKlassTemplate,
+      editingKlassTemplate, watchingKlassTemplate, announce
     } = this.state;
     const {classes} = this.props;
     return (
@@ -152,7 +168,10 @@ class TemplateContent extends React.Component {
           handleSubmit={() => this.deleteKlassTemplate(deletingKlassTemplate.id)}
           handleClose={this.handleCloseDeleteKlassTemplateDialog}
         />}
-
+        {!!announce && <Announce
+          message={announce.message} variant={announce.variant}
+          onClose={this.handleCloseAnnounce} open
+        />}
       </div>
     );
   }

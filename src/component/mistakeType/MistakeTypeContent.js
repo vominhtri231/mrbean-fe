@@ -11,6 +11,7 @@ import AddMistakeTypeForm from "./AddMistakeTypeForm";
 import EditMistakeTypeForm from "./EditMistakeTypeForm";
 import BuildIcon from "@material-ui/icons/Build"
 import MistakeRuleContent from "./MistakeRuleContent";
+import Announce from "../common/Annouce";
 
 class MistakeTypeContent extends React.Component {
   state = {
@@ -19,6 +20,7 @@ class MistakeTypeContent extends React.Component {
     openMistakeRuleForm: false,
     deletingMistakeType: undefined,
     editingMistakeType: undefined,
+    announce: undefined,
   };
 
   handleOpenAddMistakeTypeForm = () => {
@@ -53,6 +55,10 @@ class MistakeTypeContent extends React.Component {
     this.setState({openMistakeRuleForm: false})
   };
 
+  handleCloseAnnounce = () => {
+    this.setState({announce: undefined});
+  };
+
   search = (keyword) => {
     const {mistakeTypes} = this.state;
     const searchedMistakeType = mistakeTypes.map(mistakeType => {
@@ -68,27 +74,42 @@ class MistakeTypeContent extends React.Component {
       mistakeType.description.toLowerCase().includes(lowerKeyword);
   };
 
-  createMistakeType = async (name, description) => {
-    const mistakeTypeResponse = await MistakeTypeApi.create(name, description);
-    const mistakeType = mistakeTypeResponse.data;
-    const {mistakeTypes} = this.state;
-    const addedMistakeTypes = mistakeTypes.concat(mistakeType);
-    this.setState({mistakeTypes: addedMistakeTypes});
+  createMistakeType = (name, description) => {
+    MistakeTypeApi.create(name, description).then(mistakeTypeResponse => {
+      const mistakeType = mistakeTypeResponse.data;
+      const {mistakeTypes} = this.state;
+      const addedMistakeTypes = mistakeTypes.concat(mistakeType);
+      const successAnnounce = {message: "Create mistake type successfully", variant: "success"};
+      this.setState({mistakeTypes: addedMistakeTypes, announce: successAnnounce});
+    }).catch(response => {
+      const errorAnnounce = {message: "Create mistake type fail :" + response.error, variant: "error"};
+      this.setState({announce: errorAnnounce})
+    })
   };
 
-  updateMistakeType = async (id, name, description) => {
-    const mistakeTypeResponse = await MistakeTypeApi.update(id, name, description);
-    const updatedMistakeType = mistakeTypeResponse.data;
-    const {mistakeTypes} = this.state;
-    const updatedMistakeTypes = mistakeTypes.map(mistakeType => mistakeType.id === id ? updatedMistakeType : mistakeType);
-    this.setState({mistakeTypes: updatedMistakeTypes});
+  updateMistakeType = (id, name, description) => {
+    MistakeTypeApi.update(id, name, description).then(mistakeTypeResponse => {
+      const updatedMistakeType = mistakeTypeResponse.data;
+      const {mistakeTypes} = this.state;
+      const updatedMistakeTypes = mistakeTypes.map(mistakeType => mistakeType.id === id ? updatedMistakeType : mistakeType);
+      const successAnnounce = {message: "Update mistake type successfully", variant: "success"};
+      this.setState({mistakeTypes: updatedMistakeTypes, announce: successAnnounce});
+    }).catch(response => {
+      const updateErrorAnnounce = {message: "Update mistake type fail :" + response.error, variant: "error"};
+      this.setState({announce: updateErrorAnnounce})
+    })
   };
 
-  deleteMistakeType = async (id) => {
-    await MistakeTypeApi.delete(id);
-    const {mistakeTypes} = this.state;
-    const deletedMistakeTypes = mistakeTypes.filter(mistakeType => mistakeType.id !== id);
-    this.setState({mistakeTypes: deletedMistakeTypes});
+  deleteMistakeType = (id) => {
+    MistakeTypeApi.delete(id).then(() => {
+      const {mistakeTypes} = this.state;
+      const deletedMistakeTypes = mistakeTypes.filter(mistakeType => mistakeType.id !== id);
+      const successAnnounce = {message: "Delete mistake type successfully", variant: "success"};
+      this.setState({mistakeTypes: deletedMistakeTypes, announce: successAnnounce});
+    }).catch(response => {
+      const deleteErrorAnnounce = {message: "Delete mistake type fail :" + response.error, variant: "error"};
+      this.setState({announce: deleteErrorAnnounce})
+    })
   };
 
   async componentDidMount() {
@@ -104,7 +125,7 @@ class MistakeTypeContent extends React.Component {
   render() {
     const {
       openAddMistakeTypeForm, deletingMistakeType,
-      editingMistakeType, openMistakeRuleForm, mistakeTypes
+      editingMistakeType, openMistakeRuleForm, mistakeTypes, announce
     } = this.state;
     return <div>
       <SearchBar searchPlaceHolder={"Search by name or description"}
@@ -149,6 +170,10 @@ class MistakeTypeContent extends React.Component {
         title={`Do you want to delete mistake type name : ${deletingMistakeType.name}`}
         handleSubmit={() => this.deleteMistakeType(deletingMistakeType.id)}
         handleClose={this.handleCloseDeleteMistakeTypeForm}
+      />}
+      {!!announce && <Announce
+        message={announce.message} variant={announce.variant}
+        onClose={this.handleCloseAnnounce} open
       />}
     </div>
   }

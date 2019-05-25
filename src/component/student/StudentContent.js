@@ -10,12 +10,14 @@ import ClassApi from "../../api/ClassApi";
 import AddIcon from "@material-ui/icons/Add"
 import Fab from "@material-ui/core/Fab";
 import AddStudentToClassForm from "./AddStudentToClassForm";
+import Announce from "../common/Annouce";
 
 class StudentContent extends React.Component {
   state = {
     students: [],
     addStudent: false,
-    removingStudent: undefined
+    removingStudent: undefined,
+    announce: undefined,
   };
 
   handleOpenRemoveFromClassDialog = (student) => {
@@ -34,20 +36,34 @@ class StudentContent extends React.Component {
     this.setState({addStudent: false});
   };
 
-  removeFromClass = async (studentId) => {
-    const {klass} = this.props;
-    await ClassApi.removeStudents(klass.id, [studentId]);
-    const {students} = this.state;
-    const removedStudents = students.filter(student => student.id !== parseInt(studentId));
-    this.setState({students: removedStudents});
+  handleCloseAnnounce = () => {
+    this.setState({announce: undefined});
   };
 
-  addToClass = async (students) => {
+  removeFromClass = (studentId) => {
+    const {klass} = this.props;
+    ClassApi.removeStudents(klass.id, [studentId]).then(() => {
+      const {students} = this.state;
+      const removedStudents = students.filter(student => student.id !== parseInt(studentId));
+      const successAnnounce = {message: "Remove student successfully", variant: "success"};
+      this.setState({students: removedStudents, announce: successAnnounce});
+    }).catch(response => {
+      const errorAnnounce = {message: "Remove student fail :" + response.error, variant: "error"};
+      this.setState({announce: errorAnnounce})
+    })
+  };
+
+  addToClass = (students) => {
     const {klass} = this.props;
     const addingStudentsId = students.map(student => student.id);
-    await ClassApi.addStudents(klass.id, addingStudentsId);
-    const response = await StudentApi.getAllOfClass(klass.id);
-    this.setState({students: response.data});
+    ClassApi.addStudents(klass.id, addingStudentsId).then(() => {
+      const successAnnounce = {message: "Add student successfully", variant: "success"};
+      this.setState({announce: successAnnounce});
+      this.init();
+    }).catch(response => {
+      const errorAnnounce = {message: "Add student fail :" + response.error, variant: "error"};
+      this.setState({announce: errorAnnounce})
+    });
   };
 
   search = (keyword) => {
@@ -79,7 +95,7 @@ class StudentContent extends React.Component {
   };
 
   render() {
-    const {students} = this.state;
+    const {students, announce} = this.state;
     const {mode} = this.props;
     return <div>
       <SearchBar searchPlaceHolder={"Search by name "}
@@ -88,6 +104,10 @@ class StudentContent extends React.Component {
         {this.renderStudents(students)}
       </div>
       {mode === appConstants.modes.Admin ? this.renderAdminGadgets() : <></>}
+      {!!announce && <Announce
+        message={announce.message} variant={announce.variant}
+        onClose={this.handleCloseAnnounce} open
+      />}
     </div>
   }
 
@@ -117,7 +137,7 @@ class StudentContent extends React.Component {
   }
 
   renderAdminGadgets() {
-    const {removingStudent, addStudent} = this.state;
+    const {removingStudent, addStudent,} = this.state;
     return <>
       {removingStudent && <ConfirmDialog
         open={!!removingStudent}

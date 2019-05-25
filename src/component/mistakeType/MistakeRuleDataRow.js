@@ -6,13 +6,11 @@ import IconButton from "@material-ui/core/IconButton";
 import TextField from "@material-ui/core/es/TextField/TextField";
 import MenuItem from "@material-ui/core/MenuItem";
 import InputLabel from "@material-ui/core/InputLabel";
-import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward"
-import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward"
 
 class MistakeRuleDataRow extends React.Component {
   render() {
     const {
-      data, onDelete, moveUp, moveDown, mistakeTypes, standards
+      data, onDelete, mistakeTypes, standards
     } = this.props;
     return <TableRow>
       <TableCell>
@@ -50,16 +48,6 @@ class MistakeRuleDataRow extends React.Component {
           ))}</TextField>
       </TableCell>
       <TableCell>
-        {!data.top &&
-        <IconButton aria-label="Delete"
-                    onClick={() => moveUp(data)}>
-          <ArrowUpwardIcon/>
-        </IconButton>}
-        {!data.bottom &&
-        <IconButton aria-label="Delete"
-                    onClick={() => moveDown(data)}>
-          <ArrowDownwardIcon/>
-        </IconButton>}
         <IconButton aria-label="Delete"
                     onClick={() => onDelete(data)}>
           <DeleteIcon/>

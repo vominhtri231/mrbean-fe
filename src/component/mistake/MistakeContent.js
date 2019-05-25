@@ -3,12 +3,13 @@ import SearchBar from "../common/SearchBar";
 import MistakeDataRow from "./MistakeDataRow";
 import PaginationTable from "../common/table/PaginationTable";
 import Typography from "@material-ui/core/Typography";
-import MistakeApi from "../../api/MistakeApi";
 import AddIcon from "@material-ui/icons/Add"
 import Fab from "@material-ui/core/Fab";
 import AddMistakeForm from "./AddMistakeForm";
 import ConfirmDialog from "../common/ConfirmDialog";
 import EditMistakeForm from "./EditMistakeForm";
+import Announce from "../common/Annouce";
+import MistakeApi from "../../api/MistakeApi";
 
 class MistakeContent extends React.Component {
   state = {
@@ -16,14 +17,15 @@ class MistakeContent extends React.Component {
     openAddMistakeForm: false,
     deletingMistake: undefined,
     editingMistake: undefined,
+    announce: undefined,
   };
 
   handleOpenAddMistakeForm = () => {
-    this.setState({openAddMistakeTypeForm: true});
+    this.setState({openAddMistakeForm: true});
   };
 
   handleCloseAddMistakeForm = () => {
-    this.setState({openAddMistakeTypeForm: false});
+    this.setState({openAddMistakeForm: false});
   };
 
   handleOpenDeleteMistakeForm = (deletingMistake) => {
@@ -31,7 +33,7 @@ class MistakeContent extends React.Component {
   };
 
   handleCloseDeleteMistakeForm = () => {
-    this.setState({deletingMistakeType: undefined});
+    this.setState({deletingMistake: undefined});
   };
 
   handleOpenEditMistakeForm = (editingMistake) => {
@@ -39,7 +41,11 @@ class MistakeContent extends React.Component {
   };
 
   handleCloseEditMistakeForm = () => {
-    this.setState({editingMistakeType: undefined});
+    this.setState({editingMistake: undefined});
+  };
+
+  handleCloseAnnounce = () => {
+    this.setState({announce: undefined});
   };
 
   search = (keyword) => {
@@ -59,27 +65,42 @@ class MistakeContent extends React.Component {
       || mistake.mistakeType.name.toLowerCase().includes(lowerKeyword);
   };
 
-  createMistake = async (student, lesson, mistakeType) => {
-    const mistakeResponse = await MistakeApi.create(student.id, mistakeType.id, lesson.id);
-    const mistake = mistakeResponse.data;
-    const {mistakes} = this.state;
-    const addedMistakes = mistakes.concat(mistake);
-    this.setState({mistakeTypes: addedMistakes});
+  createMistake = (student, lesson, mistakeType) => {
+    MistakeApi.create(student.id, mistakeType.id, lesson.id).then(mistakeResponse => {
+      const mistake = mistakeResponse.data;
+      const {mistakes} = this.state;
+      const addedMistakes = mistakes.concat(mistake);
+      const createSuccessAnnounce = {message: "Create mistake successfully", variant: "success"};
+      this.setState({mistakes: addedMistakes, announce: createSuccessAnnounce});
+    }).catch(response => {
+      const createErrorAnnounce = {message: "Create mistake fail :" + response.error, variant: "error"};
+      this.setState({announce: createErrorAnnounce})
+    })
   };
 
-  updateMistake = async (id, student, lesson, mistakeType) => {
-    const mistakeResponse = await MistakeApi.update(id, student.id, mistakeType.id, lesson.id);
-    const updatedMistake = mistakeResponse.data;
-    const {mistakes} = this.state;
-    const updatedMistakes = mistakes.map(mistake => mistake.id === id ? updatedMistake : mistake);
-    this.setState({mistakeTypes: updatedMistakes});
+  updateMistake = (id, student, lesson, mistakeType) => {
+    MistakeApi.update(id, student.id, mistakeType.id, lesson.id).then(mistakeResponse => {
+      const updatedMistake = mistakeResponse.data;
+      const {mistakes} = this.state;
+      const updatedMistakes = mistakes.map(mistake => mistake.id === id ? updatedMistake : mistake);
+      const updateSuccessAnnounce = {message: "Update mistake successfully", variant: "success"};
+      this.setState({mistakes: updatedMistakes, announce: updateSuccessAnnounce});
+    }).catch(response => {
+      const updateErrorAnnounce = {message: "Update mistake fail :" + response.error, variant: "error"};
+      this.setState({announce: updateErrorAnnounce})
+    })
   };
 
-  deleteMistake = async (id) => {
-    await MistakeApi.delete(id);
-    const {mistakes} = this.state;
-    const deletedMistakes = mistakes.filter(mistake => mistake.id !== id);
-    this.setState({mistakeTypes: deletedMistakes});
+  deleteMistake = (id) => {
+    MistakeApi.deleteMistake(id).then(() => {
+      const {mistakes} = this.state;
+      const deletedMistakes = mistakes.filter(mistake => mistake.id !== id);
+      const deleteSuccessAnnounce = {message: "Delete mistake successfully", variant: "success"};
+      this.setState({mistakes: deletedMistakes, announce: deleteSuccessAnnounce});
+    }).catch(response => {
+      const deleteErrorAnnounce = {message: "Delete mistake fail :" + response.error, variant: "error"};
+      this.setState({announce: deleteErrorAnnounce})
+    })
   };
 
   async componentDidUpdate(prevProps) {
@@ -100,7 +121,7 @@ class MistakeContent extends React.Component {
   };
 
   render() {
-    const {openAddMistakeForm, deletingMistake, editingMistake} = this.state;
+    const {openAddMistakeForm, deletingMistake, editingMistake, announce} = this.state;
     const {klass} = this.props;
     return <div>
       <SearchBar searchPlaceHolder={"Search by lesson's number,lesson's description,mistake type or student'email"}
@@ -134,6 +155,10 @@ class MistakeContent extends React.Component {
         title={`Do you want to delete this mistake`}
         handleSubmit={() => this.deleteMistake(deletingMistake.id)}
         handleClose={this.handleCloseDeleteMistakeForm}
+      />}
+      {!!announce && <Announce
+        message={announce.message} variant={announce.variant}
+        onClose={this.handleCloseAnnounce} open
       />}
     </div>
   }

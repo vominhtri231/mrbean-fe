@@ -54,7 +54,7 @@ class Announce extends React.Component {
         horizontal: 'left',
       }}
       open={open}
-      autoHideDuration={6000}
+      autoHideDuration={5000}
       onClose={onClose}
     >
       <SnackbarContent

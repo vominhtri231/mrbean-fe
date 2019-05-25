@@ -19,6 +19,7 @@ import appConstants from "../../util/appConstants";
 import HomeworkSpec from "../homework/HomeworkSpec";
 import HomeworkWorksheetResult from "../homework/HomeworkWorksheetResult";
 import DateUtils from "../../util/DateUtils";
+import Announce from "../common/Annouce";
 
 class LessonContent extends React.Component {
   state = {
@@ -33,6 +34,7 @@ class LessonContent extends React.Component {
     doingHomework: undefined,
     endingHomework: undefined,
     watchingHomework: undefined,
+    announce: undefined,
   };
 
   handleOnAddLesson = () => {
@@ -113,6 +115,10 @@ class LessonContent extends React.Component {
     this.setState({watchingHomework: undefined})
   };
 
+  handleCloseAnnounce = () => {
+    this.setState({announce: undefined});
+  };
+
   search = (keyword) => {
     const {lessons} = this.state;
     const searchedLesson = lessons.map(lesson => {
@@ -128,110 +134,149 @@ class LessonContent extends React.Component {
       || lesson.description.toLowerCase().includes(lowerKeyword);
   };
 
-  createLesson = async (lessonNumber, description, content, homeworkTemplateList) => {
+  createLesson = (lessonNumber, description, content, homeworkTemplateList) => {
     const {klass} = this.props;
-    const {lessons} = this.state;
-    const response = await LessonApi.createLesson(lessonNumber, description, content, klass.id);
-    const lesson = response.data;
-    const addedLessons = lessons.concat(lesson);
-    if (homeworkTemplateList) {
-      const today = DateUtils.getCurrentDate();
-      homeworkTemplateList.map(homeworkTemplate => {
-        this.addHomework(homeworkTemplate.name, today, lesson.id, homeworkTemplate.questions)
-        return undefined;
-      })
-    }
-    this.setState({lessons: addedLessons});
+    LessonApi.createLesson(lessonNumber, description, content, klass.id).then(response => {
+      const lesson = response.data;
+      const {lessons} = this.state;
+      const addedLessons = lessons.concat(lesson);
+      if (homeworkTemplateList) {
+        const today = DateUtils.getCurrentDate();
+        homeworkTemplateList.map(homeworkTemplate => {
+          this.addHomework(homeworkTemplate.name, today, lesson.id, homeworkTemplate.questions)
+          return undefined;
+        })
+      }
+      const successAnnounce = {message: "Create lesson successfully", variant: "success"};
+      this.setState({lessons: addedLessons, announce: successAnnounce});
+    }).catch(response => {
+      const errorAnnounce = {message: "Create lesson fail :" + response.error, variant: "error"};
+      this.setState({announce: errorAnnounce})
+    })
   };
 
-  editLesson = async (lessonNumber, description, content, id) => {
-    const response = await LessonApi.update(lessonNumber, description, content, id);
-    const {lessons} = this.state;
-    const updatedLesson = lessons.filter(lesson => lesson.id !== id).concat(response.data);
-    this.setState({lessons: updatedLesson});
+  editLesson = (lessonNumber, description, content, id) => {
+    LessonApi.update(lessonNumber, description, content, id).then(response => {
+      const {lessons} = this.state;
+      const updatedLesson = lessons.filter(lesson => lesson.id !== id).concat(response.data);
+      const successAnnounce = {message: "Update lesson successfully", variant: "success"};
+      this.setState({lessons: updatedLesson, announce: successAnnounce});
+    }).catch(response => {
+      const errorAnnounce = {message: "Update lesson fail :" + response.error, variant: "error"};
+      this.setState({announce: errorAnnounce})
+    })
   };
 
   removeFromClass = (lessonId) => {
     LessonApi.delete(lessonId).then(() => {
       const {lessons} = this.state;
       const deletedLessons = lessons.filter(lesson => lesson.id !== lessonId);
-      this.setState({lessons: deletedLessons})
-    });
+      const successAnnounce = {message: "Delete lesson successfully", variant: "success"};
+      this.setState({lessons: deletedLessons, announce: successAnnounce})
+    }).catch(response => {
+      const errorAnnounce = {message: "Delete lesson fail :" + response.error, variant: "error"};
+      this.setState({announce: errorAnnounce})
+    })
   };
 
-  addHomework = async (name, deathLine, lessonId, questions) => {
-    const response = await HomeworkApi.createHomework(name, deathLine, lessonId, questions);
-    const addingHomework = response.data;
-    const {lessons} = this.state;
+  addHomework = (name, deathLine, lessonId, questions) => {
+    HomeworkApi.createHomework(name, deathLine, lessonId, questions).then(response => {
+      const addingHomework = response.data;
+      const {lessons} = this.state;
 
-    const addingHomeworkLesson = lessons.filter(lesson => lesson.id === lessonId)[0];
-    const originHomeworkList = addingHomeworkLesson.homeworkList;
-    const addedHomeworkList = !!originHomeworkList ? originHomeworkList.concat(addingHomework) : [addingHomework];
-    const addedHomeworkLesson = {...addingHomeworkLesson, homeworkList: addedHomeworkList};
+      const addingHomeworkLesson = lessons.filter(lesson => lesson.id === lessonId)[0];
+      const originHomeworkList = addingHomeworkLesson.homeworkList;
+      const addedHomeworkList = !!originHomeworkList ? originHomeworkList.concat(addingHomework) : [addingHomework];
+      const addedHomeworkLesson = {...addingHomeworkLesson, homeworkList: addedHomeworkList};
 
-    const addedHomeworkLessons = lessons.map(lesson => {
-      if (lesson.id === lessonId) {
-        return addedHomeworkLesson;
-      }
-      return lesson;
-    });
-    this.setState({lessons: addedHomeworkLessons});
+      const addedHomeworkLessons = lessons.map(lesson => {
+        if (lesson.id === lessonId) {
+          return addedHomeworkLesson;
+        }
+        return lesson;
+      });
+      const successAnnounce = {message: "Create homework successfully", variant: "success"};
+      this.setState({lessons: addedHomeworkLessons, announce: successAnnounce});
+    }).catch(response => {
+      const errorAnnounce = {message: "Create homework fail :" + response.error, variant: "error"};
+      this.setState({announce: errorAnnounce})
+    })
   };
 
-  editHomework = async (id, name, deathLine, lessonId, questions) => {
-    const response = await HomeworkApi.updateHomework(id, name, deathLine, questions);
-    const updatingHomework = response.data;
-    const {lessons} = this.state;
+  editHomework = (id, name, deathLine, lessonId, questions) => {
+    HomeworkApi.updateHomework(id, name, deathLine, questions).then(response => {
+      const updatingHomework = response.data;
+      const {lessons} = this.state;
 
-    const updatingHomeworkLesson = lessons.filter(lesson => lesson.id === lessonId)[0];
-    const originHomeworkList = updatingHomeworkLesson.homeworkList;
-    const updatedHomeworkList = originHomeworkList
-      .filter(homework => homework.id !== id)
-      .concat(updatingHomework);
-    const updatedHomeworkLesson = {...updatingHomeworkLesson, homeworkList: updatedHomeworkList};
+      const updatingHomeworkLesson = lessons.filter(lesson => lesson.id === lessonId)[0];
+      const originHomeworkList = updatingHomeworkLesson.homeworkList;
+      const updatedHomeworkList = originHomeworkList
+        .filter(homework => homework.id !== id)
+        .concat(updatingHomework);
+      const updatedHomeworkLesson = {...updatingHomeworkLesson, homeworkList: updatedHomeworkList};
 
-    const updatedHomeworkLessons = lessons.map(lesson => {
-      if (lesson.id === lessonId) {
-        return updatedHomeworkLesson;
-      }
-      return lesson;
-    });
-    this.setState({lessons: updatedHomeworkLessons});
+      const updatedHomeworkLessons = lessons.map(lesson => {
+        if (lesson.id === lessonId) {
+          return updatedHomeworkLesson;
+        }
+        return lesson;
+      });
+      const successAnnounce = {message: "Update homework successfully", variant: "success"};
+      this.setState({lessons: updatedHomeworkLessons, announce: successAnnounce});
+    }).catch(response => {
+      const errorAnnounce = {message: "Update homework fail :" + response.error, variant: "error"};
+      this.setState({announce: errorAnnounce})
+    })
   };
 
-  deleteHomework = async (id) => {
-    await HomeworkApi.deleteHomework(id);
-    const {lessons} = this.state;
-    const deletedLessons = lessons.map(lesson => {
-      const deletedHomeworkList = lesson.homeworkList.filter(homework => homework.id !== id);
-      return {...lesson, homeworkList: deletedHomeworkList}
-    });
-    this.setState({lessons: deletedLessons});
+  deleteHomework = (id) => {
+    HomeworkApi.deleteHomework(id).then(() => {
+      const {lessons} = this.state;
+      const deletedLessons = lessons.map(lesson => {
+        const deletedHomeworkList = lesson.homeworkList.filter(homework => homework.id !== id);
+        return {...lesson, homeworkList: deletedHomeworkList}
+      });
+      const successAnnounce = {message: "Delete homework successfully", variant: "success"};
+      this.setState({lessons: deletedLessons, announce: successAnnounce});
+    }).catch(response => {
+      const errorAnnounce = {message: "Delete homework fail :" + response.error, variant: "error"};
+      this.setState({announce: errorAnnounce})
+    })
   };
 
-  doHomework = async (homeworkId, choices) => {
+  doHomework = (homeworkId, choices) => {
     const {studentId} = this.props;
-    const {savedHomeworkStudent} = this.state;
-    const response = await HomeworkStudentApi.saveHomeworkStudent(homeworkId, studentId, choices);
-    const addedHomeworkStudent = {...savedHomeworkStudent, [homeworkId]: response.data.choices};
-    this.setState({savedHomeworkStudent: addedHomeworkStudent})
+    HomeworkStudentApi.saveHomeworkStudent(homeworkId, studentId, choices).then(response => {
+      const {savedHomeworkStudent} = this.state;
+      const addedHomeworkStudent = {...savedHomeworkStudent, [homeworkId]: response.data.choices};
+      const successAnnounce = {message: "Save homework successfully", variant: "success"};
+      this.setState({savedHomeworkStudent: addedHomeworkStudent, announce: successAnnounce})
+    }).catch(response => {
+      const errorAnnounce = {message: "Save homework fail :" + response.error, variant: "error"};
+      this.setState({announce: errorAnnounce})
+    })
   };
 
-  endHomework = async (homeworkId) => {
-    const response = await HomeworkApi.endHomework(homeworkId);
-    const endedHomework = response.data;
-    const {lessons} = this.state;
-    const endedLessons = lessons.map(lesson => {
-      const endedHomeworkList = lesson.homeworkList
-        .map(homework => {
-          if (homework.id === endedHomework.id) {
-            return endedHomework;
-          }
-          return homework;
-        });
-      return {...lesson, homeworkList: endedHomeworkList}
-    });
-    this.setState({lessons: endedLessons});
+  endHomework = (homeworkId) => {
+    HomeworkApi.endHomework(homeworkId).then(response => {
+      const endedHomework = response.data;
+      const {lessons} = this.state;
+      const endedLessons = lessons.map(lesson => {
+        const endedHomeworkList = lesson.homeworkList
+          .map(homework => {
+            if (homework.id === endedHomework.id) {
+              return endedHomework;
+            }
+            return homework;
+          });
+        return {...lesson, homeworkList: endedHomeworkList}
+      });
+      const successAnnounce = {message: "End homework successfully", variant: "success"};
+      this.setState({lessons: endedLessons, announce: successAnnounce});
+    }).catch(response => {
+      const errorAnnounce = {message: "End homework fail :" + response.error, variant: "error"};
+      this.setState({announce: errorAnnounce})
+    })
   };
 
   getHomeworkStudents = async (homeworkIds, studentId) => {
@@ -275,6 +320,7 @@ class LessonContent extends React.Component {
 
   render() {
     const {mode} = this.props;
+    const {announce} = this.state;
     return <div>
       <SearchBar searchPlaceHolder={"Search by lesson number or description "}
                  onSearch={this.search}
@@ -288,6 +334,10 @@ class LessonContent extends React.Component {
           this.renderTeacherModeGadgets() :
           this.renderAdminModeGadgets()
       }
+      {!!announce && <Announce
+        message={announce.message} variant={announce.variant}
+        onClose={this.handleCloseAnnounce} open
+      />}
     </div>
   }
 
