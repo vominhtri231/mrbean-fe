@@ -12,6 +12,8 @@ import AdminApi from "../../api/AdminApi";
 import TeacherApi from "../../api/TeacherApi";
 import StudentApi from "../../api/StudentApi";
 import DateUtils from "../../util/DateUtils";
+import Validater from "../../util/Validater";
+import FormError from "../common/FormError";
 
 class EditUserForm extends React.Component {
   state = {
@@ -26,6 +28,14 @@ class EditUserForm extends React.Component {
   handleSubmitButtonClick = () => {
     const {email, name, phoneNumber, dateOfBirth, workspace, isWorker} = this.state;
     const {user, handleClose, handleSubmit} = this.props;
+    const validateResult = Validater.validateUser(user.role, email, name, phoneNumber, workspace);
+    if (validateResult) {
+      this.setState({error: validateResult});
+      return;
+    }
+    this.setState({
+      error: undefined,
+    });
     handleSubmit(user.role, user.id, email, name, phoneNumber, dateOfBirth, workspace, isWorker);
     handleClose();
   };
@@ -92,6 +102,7 @@ class EditUserForm extends React.Component {
 
   render() {
     const {open, handleClose} = this.props;
+    const {error} = this.state;
     const user = this.props.user;
     if (!user) return <></>;
     const role = user.role;
@@ -113,6 +124,7 @@ class EditUserForm extends React.Component {
         {this.renderSpecificRoleForm(role)}
       </DialogContent>
       <DialogActions>
+        <FormError errorMessage={error}/>
         <Button onClick={handleClose} color="primary">
           Cancel
         </Button>

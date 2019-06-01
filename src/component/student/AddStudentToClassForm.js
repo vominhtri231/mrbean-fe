@@ -8,16 +8,28 @@ import DialogActions from "@material-ui/core/DialogActions";
 import Button from "@material-ui/core/Button";
 import AutoCompete from "../common/AutoCompete";
 import StudentApi from "../../api/StudentApi";
+import Validater from "../../util/Validater";
+import FormError from "../common/FormError";
 
 class AddStudentToClassForm extends React.Component {
   state = {
     students: [],
     selectedStudents: [],
+    error: undefined
   };
 
   handleSubmitButtonClick = () => {
     const {handleSubmit, handleClose} = this.props;
     const {selectedStudents} = this.state;
+    const validateResult = Validater.validateAddLesson(selectedStudents);
+    if (validateResult) {
+      this.setState({error: validateResult});
+      return;
+    }
+    this.setState({
+      selectedStudents: [],
+      error: undefined
+    });
     handleSubmit(selectedStudents.map(selectedStudent => selectedStudent.value));
     handleClose();
   };
@@ -34,7 +46,7 @@ class AddStudentToClassForm extends React.Component {
 
   render() {
     const {open, handleClose} = this.props;
-    const {students, selectedStudents} = this.state;
+    const {students, selectedStudents, error} = this.state;
     const suggestions = students.map(student => ({
       value: student,
       label: student.email
@@ -55,6 +67,7 @@ class AddStudentToClassForm extends React.Component {
         </FormControl>
       </DialogContent>
       <DialogActions>
+        <FormError errorMessage={error}/>
         <Button onClick={handleClose} color="primary">
           Cancel
         </Button>

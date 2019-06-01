@@ -5,17 +5,30 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import TextField from "@material-ui/core/TextField";
+import Validater from "../../util/Validater";
+import FormError from "../common/FormError";
 
 class AddMistakeTypeForm extends React.Component {
   state = {
     name: "",
     description: "",
+    error: undefined
   };
 
   handleSubmitButtonClick = () => {
     const {handleSubmit} = this.props;
     const {name, description} = this.state;
+    const validateResult = Validater.validateMistakeType(name, description);
+    if (validateResult) {
+      this.setState({error: validateResult});
+      return;
+    }
     handleSubmit(name, description);
+    this.setState({
+      name: "",
+      description: "",
+      error: undefined,
+    });
     this.handleClose();
   };
 
@@ -38,7 +51,7 @@ class AddMistakeTypeForm extends React.Component {
 
   render() {
     const {open} = this.props;
-    const {name, description} = this.state;
+    const {name, description, error} = this.state;
     return <Dialog
       open={open}
       onClose={this.handleClose}
@@ -71,6 +84,7 @@ class AddMistakeTypeForm extends React.Component {
         </form>
       </DialogContent>
       <DialogActions>
+        <FormError errorMessage={error}/>
         <Button onClick={this.handleClose} color="primary">
           Cancel
         </Button>

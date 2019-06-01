@@ -10,6 +10,8 @@ import MistakeTypeApi from "../../api/MistakeTypeApi";
 import {FormControl} from "@material-ui/core";
 import AutoCompete from "../common/AutoCompete";
 import FormLabel from "@material-ui/core/FormLabel";
+import Validater from "../../util/Validater";
+import FormError from "../common/FormError";
 
 class AddMistakeForm extends React.Component {
   state = {
@@ -19,14 +21,23 @@ class AddMistakeForm extends React.Component {
     selectedStudent: undefined,
     selectedLesson: undefined,
     selectedMistakeType: undefined,
+    error: undefined,
   };
 
   handleSubmitButtonClick = () => {
     const {handleSubmit} = this.props;
     const {selectedStudent, selectedLesson, selectedMistakeType} = this.state;
+    const validateResult = Validater.validateMistake(selectedStudent, selectedLesson, selectedMistakeType);
+    if (validateResult) {
+      this.setState({error: validateResult})
+      return;
+    }
     const student = selectedStudent.value;
     const lesson = selectedLesson.value;
     const mistakeType = selectedMistakeType.value;
+    this.setState({
+      error: undefined,
+    });
     handleSubmit(student, lesson, mistakeType);
   };
 
@@ -67,7 +78,7 @@ class AddMistakeForm extends React.Component {
     const {open, handleClose} = this.props;
     const {
       selectedStudent, selectedLesson, selectedMistakeType,
-      students, lessons, mistakeTypes
+      students, lessons, mistakeTypes, error
     } = this.state;
 
     const studentSuggestions = students.map(student => ({
@@ -120,6 +131,7 @@ class AddMistakeForm extends React.Component {
         </FormControl>
       </DialogContent>
       <DialogActions>
+        <FormError errorMessage={error}/>
         <Button onClick={handleClose} color="primary">
           Cancel
         </Button>

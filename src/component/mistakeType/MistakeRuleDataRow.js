@@ -6,6 +6,7 @@ import IconButton from "@material-ui/core/IconButton";
 import TextField from "@material-ui/core/es/TextField/TextField";
 import MenuItem from "@material-ui/core/MenuItem";
 import InputLabel from "@material-ui/core/InputLabel";
+import Validater from "../../util/Validater";
 
 class MistakeRuleDataRow extends React.Component {
   render() {
@@ -68,7 +69,11 @@ class MistakeRuleDataRow extends React.Component {
   };
   handleThresholdChange = (e) => {
     const {data, onEdit} = this.props;
-    const updatedData = {...data, threshold: e.target.value};
+    const newThreshold = e.target.value;
+    if (!Validater.isPercent(newThreshold)) {
+      return;
+    }
+    const updatedData = {...data, threshold: newThreshold};
     onEdit(updatedData);
   }
 }

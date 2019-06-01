@@ -13,6 +13,13 @@ export default Object.freeze({
     "CompleteRate",
     "AccuracyRate",
   ],
+  validateResult:{
+    empty:" must not empty",
+    notNumber:" is not a positive number",
+    mustChoice:" must be chosen",
+    mustPercent:" must between 0 and 1000",
+    notEmail:"is not an email's format",
+  },
   excelType: ".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel",
   basicAccessToken: "bXktY2xpZW50Om15LXNlY3JldA==",
 })

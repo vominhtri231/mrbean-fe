@@ -12,6 +12,8 @@ import FormLabel from "@material-ui/core/FormLabel";
 import ChooseLessonTemplateForm from "./ChooseLessonTemplateForm";
 import LessonTemplateApi from "../../api/LessonTemplateApi";
 import EditorContentUtils from "../../util/EditorContentUtils";
+import Validater from "../../util/Validater";
+import FormError from "../common/FormError";
 
 class AddLessonForm extends React.Component {
   state = {
@@ -20,6 +22,7 @@ class AddLessonForm extends React.Component {
     content: EditorState.createEmpty(),
     openChooseLessonTemplate: false,
     homeworkTemplateList: undefined,
+    error: undefined
   };
 
   handleOpenChooseLessonTemplate = () => {
@@ -33,7 +36,15 @@ class AddLessonForm extends React.Component {
   handleSubmitButtonClick = async () => {
     const {lessonNumber, description, content, homeworkTemplateList} = this.state;
     const {handleClose, handleSubmit} = this.props;
+    const validateResult = Validater.validateLesson(lessonNumber, description, content);
+    if (validateResult) {
+      this.setState({
+        error: validateResult
+      });
+      return;
+    }
     handleSubmit(lessonNumber, description, this.convertLessonContent(content), homeworkTemplateList);
+    this.initState();
     handleClose();
   };
 
@@ -62,9 +73,20 @@ class AddLessonForm extends React.Component {
     })
   };
 
+  initState = () => {
+    this.setState({
+      lessonNumber: "",
+      description: "",
+      content: EditorState.createEmpty(),
+      openChooseLessonTemplate: false,
+      homeworkTemplateList: undefined,
+      error: undefined
+    });
+  };
+
   render() {
     const {open, handleClose} = this.props;
-    const {content, openChooseLessonTemplate, description} = this.state;
+    const {content, openChooseLessonTemplate, description, error} = this.state;
     return <Dialog
       fullScreen
       open={open}
@@ -112,6 +134,7 @@ class AddLessonForm extends React.Component {
         </form>
       </DialogContent>
       <DialogActions>
+        <FormError errorMessage={error}/>
         <Button onClick={handleClose} color="primary">
           Cancel
         </Button>

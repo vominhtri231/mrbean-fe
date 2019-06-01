@@ -12,6 +12,8 @@ import {FormControl} from "@material-ui/core";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import appConstants from "../../util/appConstants";
+import Validater from "../../util/Validater";
+import FormError from "../common/FormError";
 
 class AddUserForm extends React.Component {
   state = {
@@ -22,11 +24,27 @@ class AddUserForm extends React.Component {
     dateOfBirth: "",
     workspace: "",
     isWorker: false,
+    error: undefined,
   };
 
   handleSubmitButtonClick = () => {
     const {role, email, name, phoneNumber, dateOfBirth, workspace, isWorker} = this.state;
     const {handleClose, handleSubmit} = this.props;
+    const validateResult = Validater.validateUser(role, email, name, phoneNumber, workspace);
+    if (validateResult) {
+      this.setState({error: validateResult});
+      return;
+    }
+    this.setState({
+      role: appConstants.roles.Admin,
+      email: "",
+      name: "",
+      phoneNumber: "",
+      dateOfBirth: "",
+      workspace: "",
+      isWorker: false,
+      error: undefined,
+    });
     handleSubmit(role, email, name, phoneNumber, dateOfBirth, workspace, isWorker);
     handleClose();
   };
@@ -61,7 +79,7 @@ class AddUserForm extends React.Component {
 
   render() {
     const {open, handleClose} = this.props;
-    const {role} = this.state;
+    const {role, error} = this.state;
     const roles = [
       appConstants.roles.Admin,
       appConstants.roles.Teacher,
@@ -75,7 +93,7 @@ class AddUserForm extends React.Component {
         <FormControl style={{
           minWidth: 120,
         }}>
-          <InputLabel >Role</InputLabel>
+          <InputLabel>Role</InputLabel>
           <Select
             value={role}
             onChange={this.handleRoleChange}
@@ -90,6 +108,7 @@ class AddUserForm extends React.Component {
         {this.renderSpecificRoleForm(role)}
       </DialogContent>
       <DialogActions>
+        <FormError errorMessage={error}/>
         <Button onClick={handleClose} color="primary">
           Cancel
         </Button>

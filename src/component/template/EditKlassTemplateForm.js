@@ -5,6 +5,8 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import Validater from "../../util/Validater";
+import FormError from "../common/FormError";
 
 class EditKlassTemplateForm extends React.Component {
   state = {
@@ -15,6 +17,13 @@ class EditKlassTemplateForm extends React.Component {
     const {klass} = this.props;
     const {name} = this.state;
     const {handleClose, handleSubmit} = this.props;
+    if (Validater.isEmpty(name)) {
+      this.setState({error: "Name must not empty"});
+      return;
+    }
+    this.setState({
+      error: undefined,
+    });
     handleSubmit(klass.id, name);
     handleClose();
   };
@@ -34,7 +43,7 @@ class EditKlassTemplateForm extends React.Component {
 
   render() {
     const {open, handleClose} = this.props;
-    const {name} = this.state;
+    const {name, error} = this.state;
     return <Dialog
       open={open}
       onClose={handleClose}
@@ -55,6 +64,7 @@ class EditKlassTemplateForm extends React.Component {
         </form>
       </DialogContent>
       <DialogActions>
+        <FormError errorMessage={error}/>
         <Button onClick={handleClose} color="primary">
           Cancel
         </Button>

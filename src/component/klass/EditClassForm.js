@@ -9,18 +9,27 @@ import {FormControl} from "@material-ui/core";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import InputLabel from "@material-ui/core/InputLabel";
+import Validater from "../../util/Validater";
+import FormError from "../common/FormError";
 
 class EditClassForm extends React.Component {
   state = {
     name: "",
     description: "",
-    chosenTeacherId: undefined
+    chosenTeacherId: undefined,
+    error: undefined
   };
 
   handleSubmitButtonClick = async () => {
     const {klass} = this.props;
     const {name, description, chosenTeacherId} = this.state;
     const {handleClose, handleSubmit} = this.props;
+
+    const validateResult = Validater.validateKlass(name, description, chosenTeacherId, [1]);
+    if (validateResult) {
+      this.setState({error: validateResult});
+      return;
+    }
     handleSubmit(klass.id, name, description, chosenTeacherId);
     handleClose();
   };
@@ -50,7 +59,7 @@ class EditClassForm extends React.Component {
 
   render() {
     const {open, handleClose, teachers} = this.props;
-    const {name, description, chosenTeacherId} = this.state;
+    const {name, description, chosenTeacherId, error} = this.state;
     return <Dialog
       open={open}
       onClose={handleClose}
@@ -91,6 +100,7 @@ class EditClassForm extends React.Component {
         </form>
       </DialogContent>
       <DialogActions>
+        <FormError errorMessage={error}/>
         <Button onClick={handleClose} color="primary">
           Cancel
         </Button>

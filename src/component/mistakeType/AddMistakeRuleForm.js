@@ -9,12 +9,15 @@ import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import TextField from "@material-ui/core/es/TextField/TextField";
 import InputLabel from "@material-ui/core/InputLabel";
+import Validater from "../../util/Validater";
+import FormError from "../common/FormError";
 
 class AddMistakeRuleForm extends React.Component {
   state = {
     mistakeTypeId: undefined,
     standard: undefined,
     threshold: 0,
+    error: undefined,
   };
 
   handleMistakeTypeChange = (e) => {
@@ -32,7 +35,18 @@ class AddMistakeRuleForm extends React.Component {
   handleSubmitButtonClick = () => {
     const {handleSubmit} = this.props;
     const {standard, mistakeTypeId, threshold} = this.state;
+    const validateResult = Validater.validateMistakeRule(standard, mistakeTypeId, threshold);
+    if (validateResult) {
+      this.setState({error: validateResult});
+      return;
+    }
     handleSubmit(standard, mistakeTypeId, threshold);
+    this.setState({
+      mistakeTypeId: undefined,
+      standard: undefined,
+      threshold: 0,
+      error: undefined,
+    });
     this.handleClose();
   };
 
@@ -48,7 +62,7 @@ class AddMistakeRuleForm extends React.Component {
 
   render() {
     const {open, mistakeTypes, standards} = this.props;
-    const {mistakeTypeId, standard, threshold} = this.state;
+    const {mistakeTypeId, standard, threshold, error} = this.state;
     return <Dialog
       open={open}
       onClose={this.handleClose}
@@ -98,6 +112,7 @@ class AddMistakeRuleForm extends React.Component {
         </form>
       </DialogContent>
       <DialogActions>
+        <FormError errorMessage={error}/>
         <Button onClick={this.handleClose} color="primary">
           Cancel
         </Button>

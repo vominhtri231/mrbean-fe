@@ -6,16 +6,29 @@ import DialogActions from "@material-ui/core/DialogActions";
 import Button from "@material-ui/core/Button";
 import {TextField} from "@material-ui/core";
 import QuestionInput from "../homework/QuestionInput";
+import Validater from "../../util/Validater";
+import FormError from "../common/FormError";
 
 class HomeworkInput extends React.Component {
   state = {
     name: "",
     questions: [],
+    error: undefined,
   };
 
   handleSubmitAddHomework = () => {
     const {addHomework, lessonId, handleClose} = this.props;
     const {questions, name} = this.state;
+    const validateResult = Validater.validateHomework(name, questions);
+    if (validateResult) {
+      this.setState({error: validateResult});
+      return;
+    }
+    this.setState({
+      name: "",
+      questions: [],
+      error: undefined
+    });
     addHomework(name, lessonId, questions);
     handleClose();
   };
@@ -23,6 +36,12 @@ class HomeworkInput extends React.Component {
   handleSubmitEditHomework = () => {
     const {editHomework, lessonId, homework, handleClose} = this.props;
     const {questions, name} = this.state;
+    const validateResult = Validater.validateHomework(name, questions);
+    if (validateResult) {
+      this.setState({error: validateResult});
+      return;
+    }
+    this.setState({error: undefined});
     editHomework(homework.id, name, lessonId, questions);
     handleClose();
   };
@@ -66,7 +85,7 @@ class HomeworkInput extends React.Component {
 
   render() {
     const {open, handleClose, homework} = this.props;
-    const {questions, name} = this.state;
+    const {questions, name, error} = this.state;
     const addMode = !homework;
     return <Dialog
       open={open}
@@ -90,6 +109,7 @@ class HomeworkInput extends React.Component {
                          onQuestionChange={this.questionChange}/>)}
       </DialogContent>
       <DialogActions>
+        <FormError errorMessage={error}/>
         <Button onClick={handleClose} color="primary">
           Cancel
         </Button>

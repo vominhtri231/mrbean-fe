@@ -9,6 +9,8 @@ import {convertFromRaw, convertToRaw, EditorState} from "draft-js";
 import {FormControl} from "@material-ui/core";
 import ContentEditor from "../common/ContentEditor";
 import FormLabel from "@material-ui/core/FormLabel";
+import Validater from "../../util/Validater";
+import FormError from "../common/FormError";
 
 class EditLessonTemplateForm extends React.Component {
   constructor(props) {
@@ -23,6 +25,13 @@ class EditLessonTemplateForm extends React.Component {
     const {description, content} = this.state;
     const {handleClose, handleSubmit, lesson} = this.props;
     if (!lesson) return;
+    if (Validater.isEmpty(description)) {
+      this.setState({error: "Description must not empty"});
+      return;
+    }
+    this.setState({
+      error: undefined,
+    });
     handleSubmit(lesson.id, description, this.convertLessonContent(content));
     handleClose();
   };
@@ -55,7 +64,7 @@ class EditLessonTemplateForm extends React.Component {
 
   render() {
     const {open, handleClose} = this.props;
-    const {description, content} = this.state;
+    const {description, content, error} = this.state;
 
     return <Dialog
       open={open}
@@ -87,6 +96,7 @@ class EditLessonTemplateForm extends React.Component {
         </form>
       </DialogContent>
       <DialogActions>
+        <FormError errorMessage={error}/>
         <Button onClick={handleClose} color="primary">
           Cancel
         </Button>

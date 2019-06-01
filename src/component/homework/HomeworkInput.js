@@ -7,6 +7,8 @@ import DialogActions from "@material-ui/core/DialogActions";
 import Button from "@material-ui/core/Button";
 import {TextField} from "@material-ui/core";
 import DateUtils from "../../util/DateUtils";
+import Validater from "../../util/Validater";
+import FormError from "../common/FormError";
 
 class HomeworkInput extends React.Component {
   state = {
@@ -14,11 +16,17 @@ class HomeworkInput extends React.Component {
     deathLine: DateUtils.getCurrentDate(),
     questions: [],
     ended: false,
+    error: undefined,
   };
 
   handleSubmitAddHomework = () => {
     const {addHomework, lessonId, handleClose} = this.props;
     const {questions, name, deathLine} = this.state;
+    const validateResult = Validater.validateHomework(name, questions);
+    if (validateResult) {
+      this.setState({error: validateResult});
+      return;
+    }
     addHomework(name, deathLine, lessonId, questions);
     handleClose();
   };
@@ -26,6 +34,11 @@ class HomeworkInput extends React.Component {
   handleSubmitEditHomework = () => {
     const {editHomework, lessonId, homework, handleClose} = this.props;
     const {questions, name, deathLine} = this.state;
+    const validateResult = Validater.validateHomework(name, questions);
+    if (validateResult) {
+      this.setState({error: validateResult});
+      return;
+    }
     editHomework(homework.id, name, deathLine, lessonId, questions);
     handleClose();
   };
@@ -83,7 +96,7 @@ class HomeworkInput extends React.Component {
 
   render() {
     const {open, handleClose, homework} = this.props;
-    const {questions, name, deathLine, ended} = this.state;
+    const {questions, name, deathLine, ended, error} = this.state;
     const addMode = !homework;
     const today = DateUtils.getCurrentDate();
     const over = today > deathLine;
@@ -127,6 +140,7 @@ class HomeworkInput extends React.Component {
                          onQuestionChange={this.questionChange}/>)}
       </DialogContent>
       <DialogActions>
+        <FormError errorMessage={error}/>
         <Button onClick={handleClose} color="primary">
           Cancel
         </Button>

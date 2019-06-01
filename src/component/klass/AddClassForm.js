@@ -12,21 +12,35 @@ import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import InputLabel from "@material-ui/core/InputLabel";
 import appConstants from "../../util/appConstants";
+import Validater from "../../util/Validater";
+import FormError from "../common/FormError";
 
 class AddClassForm extends React.Component {
   state = {
     name: "",
     description: "",
     files: undefined,
-    chosenTeacherId: undefined
+    chosenTeacherId: undefined,
+    error: undefined
   };
 
   handleSubmitButtonClick = async () => {
     const {name, description, chosenTeacherId, files} = this.state;
     const {handleClose, handleSubmit} = this.props;
-    if (!files || !files[0]) return;
+    const validateResult = Validater.validateKlass(name, description, chosenTeacherId, files);
+    if (validateResult) {
+      this.setState({error: validateResult});
+      return;
+    }
     const students = await this.xlsxFileToStudents(files[0]);
     handleSubmit(name, description, chosenTeacherId, students);
+    this.setState({
+      name: "",
+      description: "",
+      files: undefined,
+      chosenTeacherId: undefined,
+      error: undefined
+    });
     handleClose();
   };
 
@@ -63,7 +77,7 @@ class AddClassForm extends React.Component {
 
   render() {
     const {open, handleClose, teachers} = this.props;
-    const {chosenTeacherId} = this.state;
+    const {chosenTeacherId, error} = this.state;
     return <Dialog
       open={open}
       onClose={handleClose}
@@ -92,7 +106,7 @@ class AddClassForm extends React.Component {
           <FormControl fullWidth style={{marginTop: 16}}>
             {!chosenTeacherId && <InputLabel>teacher</InputLabel>}
             <Select
-              value={chosenTeacherId?chosenTeacherId:""}
+              value={chosenTeacherId ? chosenTeacherId : ""}
               onChange={this.handleTeacherChange}
             >
               {teachers.map(teacher =>
@@ -108,6 +122,7 @@ class AddClassForm extends React.Component {
         </form>
       </DialogContent>
       <DialogActions>
+        <FormError errorMessage={error}/>
         <Button onClick={handleClose} color="primary">
           Cancel
         </Button>
