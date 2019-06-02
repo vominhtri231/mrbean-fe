@@ -215,7 +215,8 @@ class HomeworkResult extends React.Component {
 
   getCompletion = (choices, homework) => {
     if (!homework.questions || !homework.questions.length) return 0;
-    return choices.length * 100 / homework.questions.length;
+    const validChoices = choices.filter(choice => choice !== null);
+    return validChoices.length * 100 / homework.questions.length;
   };
 
   getResult = (choices, homework) => {

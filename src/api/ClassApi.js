@@ -31,11 +31,11 @@ class ClassApi {
   }
 
   static getClassesOfTeacher(teacherId) {
-    return ApiCaller.get(`${baseUrl}?teacher=${teacherId}`)
+    return ApiCaller.get(`${baseUrl}/teacher?teacherId=${teacherId}`)
   }
 
   static getClassesOfStudent(studentId) {
-    return ApiCaller.get(`${baseUrl}?student=${studentId}`)
+    return ApiCaller.get(`${baseUrl}/student?studentId=${studentId}`)
   }
 
   static updateClass(id, name, description, teacherId) {
