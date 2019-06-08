@@ -7,6 +7,14 @@ class LocalStorageManager {
     localStorage.setItem('accessToken', accessToken);
   };
 
+  static setSelectedKlass = selectedKlass => {
+    localStorage.setItem('selectedKlass', JSON.stringify(selectedKlass));
+  };
+
+  static getSelectedKlass = () => {
+    return JSON.parse(localStorage.getItem('selectedKlass'));
+  };
+
   static clearAccessToken = () => {
     localStorage.clear();
   };
@@ -15,7 +23,7 @@ class LocalStorageManager {
     localStorage.setItem('user', user);
   };
 
-  static getUser = ()=>{
+  static getUser = () => {
     return localStorage.getItem('user');
   }
 }

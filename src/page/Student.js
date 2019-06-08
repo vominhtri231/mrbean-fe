@@ -8,6 +8,7 @@ import appConstants from "../util/appConstants";
 import App from "../App";
 import StudentMistakeContent from "../component/mistake/StudentMistakeContent";
 import UnfoldMoreIcon from "@material-ui/icons/UnfoldMore"
+import LocalStorageManager from "../util/LocalStorageManager";
 
 class Student extends React.Component {
   state = {
@@ -27,6 +28,8 @@ class Student extends React.Component {
   changeClass = (klassId) => {
     const {klasses} = this.state;
     const newSelectedKlass = klasses.filter(klass => klass.id.toString() === klassId);
+    console.log(newSelectedKlass);
+    LocalStorageManager.setSelectedKlass(newSelectedKlass[0]);
     this.setState({selectedKlass: newSelectedKlass[0]})
   };
 
@@ -42,7 +45,9 @@ class Student extends React.Component {
   async componentDidMount() {
     const studentId = this.props.user.id;
     const klasses = await this.getClassesOfStudent(studentId);
-    const selectedKlass = klasses.length > 0 ? klasses[0] : undefined;
+    const savedSelectedKlass = LocalStorageManager.getSelectedKlass();
+    const selectedKlass = savedSelectedKlass ? savedSelectedKlass :
+      klasses.length > 0 ? klasses[0] : undefined;
     this.setState({klasses, selectedKlass})
   }
 

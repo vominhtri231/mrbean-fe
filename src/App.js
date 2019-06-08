@@ -35,36 +35,48 @@ class App extends React.Component {
 
   render() {
     const {user} = this.state;
+
     return (
       <BrowserRouter>
         <Switch>
-          <Route path="/" component={Home} exact/>
-          <Route path="/login" exact
-                 render={(props) => <Login
-                   {...props}
-                   initUser={this.initUser}/>}/>
-          <Route path="/class/:klassId" exact
-                 render={(props) => <Klass
-                   user={user} {...props}
-                   editUser={this.editUser}
-                   logout={this.logout}/>}/>
-          <Route path="/admin" exact
-                 render={(props) => <Admin
-                   user={user} {...props}
-                   editUser={this.editUser}
-                   logout={this.logout}/>}/>
-          <Route path="/teacher" exact
-                 render={(props) => <Teacher
-                   user={user} {...props}
-                   editUser={this.editUser}
-                   logout={this.logout}/>}/>
-          <Route path="/student" exact
-                 render={(props) => <Student
-                   user={user} {...props}
-                   editUser={this.editUser}
-                   logout={this.logout}/>}/>
-          <Route path="*" exact
-                 render={() => App.forwarder(user)}/>
+          {(!user || !user.role) ?
+            <>
+              <Route path="/" component={Home} exact/>
+              <Route path="/login" exact
+                     render={(props) => <Login
+                       {...props}
+                       initUser={this.initUser}/>}/>
+            </>
+            :
+            <>
+              <Route path="/" component={Home} exact/>
+              <Route path="/login" exact
+                     render={(props) => <Login
+                       {...props}
+                       initUser={this.initUser}/>}/>
+              <Route path="/class/:klassId" exact
+                     render={(props) => <Klass
+                       user={user} {...props}
+                       editUser={this.editUser}
+                       logout={this.logout}/>}/>
+              <Route path="/admin" exact
+                     render={(props) => <Admin
+                       user={user} {...props}
+                       editUser={this.editUser}
+                       logout={this.logout}/>}/>
+              <Route path="/teacher" exact
+                     render={(props) => <Teacher
+                       user={user} {...props}
+                       editUser={this.editUser}
+                       logout={this.logout}/>}/>
+              <Route path="/student" exact
+                     render={(props) => <Student
+                       user={user} {...props}
+                       editUser={this.editUser}
+                       logout={this.logout}/>}/>
+              <Route path="*" exact
+                     render={() => App.forwarder(user)}/>
+            </>}
         </Switch>
       </BrowserRouter>
     );
