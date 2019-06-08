@@ -12,30 +12,12 @@ class ClassApi {
     })
   }
 
-  static removeStudents(id, studentIds) {
-    return ApiCaller.update(`${baseUrl}/removeStudents`, {
-      "id": id,
-      "studentIds": studentIds
-    })
-  }
-
-  static addStudents(id, studentIds) {
-    return ApiCaller.update(`${baseUrl}/addStudents`, {
-      "id": id,
-      "studentIds": studentIds
-    })
-  }
-
   static getClasses() {
     return ApiCaller.get(`${baseUrl}`)
   }
 
   static getClassesOfTeacher(teacherId) {
     return ApiCaller.get(`${baseUrl}/teacher?teacherId=${teacherId}`)
-  }
-
-  static getClassesOfStudent(studentId) {
-    return ApiCaller.get(`${baseUrl}/student?studentId=${studentId}`)
   }
 
   static updateClass(id, name, description, teacherId) {

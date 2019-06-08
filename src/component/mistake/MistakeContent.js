@@ -10,9 +10,15 @@ import ConfirmDialog from "../common/ConfirmDialog";
 import EditMistakeForm from "./EditMistakeForm";
 import Announce from "../common/Annouce";
 import MistakeApi from "../../api/MistakeApi";
+import KlassStudentApi from "../../api/KlassStudentApi";
+import LessonApi from "../../api/LessonApi";
+import MistakeTypeApi from "../../api/MistakeTypeApi";
 
 class MistakeContent extends React.Component {
   state = {
+    students: [],
+    lessons: [],
+    mistakeTypes: [],
     mistakes: [],
     openAddMistakeForm: false,
     deletingMistake: undefined,
@@ -115,13 +121,22 @@ class MistakeContent extends React.Component {
 
   init = async () => {
     const {klass} = this.props;
-    const response = await MistakeApi.getAllOfKlass(klass.id);
-    const mistakes = response.data;
-    this.setState({mistakes});
+    const studentResponse = await KlassStudentApi.getStudentsOfKlass(klass.id);
+    const students = studentResponse.data;
+    const lessonResponse = await LessonApi.getAllOfClass(klass.id);
+    const lessons = lessonResponse.data;
+    const mistakeTypeResponse = await MistakeTypeApi.getAll();
+    const mistakeTypes = mistakeTypeResponse.data;
+    const mistakeResponse = await MistakeApi.getAllOfKlass(klass.id);
+    const mistakes = mistakeResponse.data;
+    this.setState({students, lessons, mistakeTypes, mistakes});
   };
 
   render() {
-    const {openAddMistakeForm, deletingMistake, editingMistake, announce} = this.state;
+    const {
+      openAddMistakeForm, deletingMistake, editingMistake,
+      announce, students, lessons, mistakeTypes,
+    } = this.state;
     const {klass} = this.props;
     return <div>
       <SearchBar searchPlaceHolder={"Search by lesson's number,lesson's description,mistake type or student'email"}
@@ -138,13 +153,17 @@ class MistakeContent extends React.Component {
         <AddIcon/>
       </Fab>
       <AddMistakeForm
-        klassId={klass.id}
+        students={students}
+        lessons={lessons}
+        mistakeTypes={mistakeTypes}
         open={openAddMistakeForm}
         handleSubmit={this.createMistake}
         handleClose={this.handleCloseAddMistakeForm}
       />
       <EditMistakeForm
-        klassId={klass.id}
+        students={students}
+        lessons={lessons}
+        mistakeTypes={mistakeTypes}
         open={!!editingMistake}
         mistake={editingMistake}
         handleSubmit={this.updateMistake}

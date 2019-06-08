@@ -4,18 +4,12 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import StudentApi from "../../api/StudentApi";
-import LessonApi from "../../api/LessonApi";
-import MistakeTypeApi from "../../api/MistakeTypeApi";
 import {FormControl} from "@material-ui/core";
 import AutoCompete from "../common/AutoCompete";
 import FormLabel from "@material-ui/core/FormLabel";
 
 class EditMistakeForm extends React.Component {
   state = {
-    students: [],
-    lessons: [],
-    mistakeTypes: [],
     selectedStudent: undefined,
     selectedLesson: undefined,
     selectedMistakeType: undefined,
@@ -43,15 +37,7 @@ class EditMistakeForm extends React.Component {
     this.setState({selectedMistakeType: value})
   };
 
-  async componentDidMount() {
-    const {klassId} = this.props;
-    await this.init(klassId)
-  }
-
   async componentDidUpdate(prevProps) {
-    if (prevProps.klassId !== this.props.klassId) {
-      await this.init(this.props.klassId)
-    }
     const {mistake} = this.props;
     if (JSON.stringify(mistake) !== JSON.stringify(prevProps.mistake) && mistake) {
       const student = mistake.student;
@@ -73,22 +59,9 @@ class EditMistakeForm extends React.Component {
     }
   }
 
-  init = async (klassId) => {
-    const studentResponse = await StudentApi.getAllOfClass(klassId);
-    const students = studentResponse.data;
-    const lessonResponse = await LessonApi.getAllOfClass(klassId);
-    const lessons = lessonResponse.data;
-    const mistakeTypeResponse = await MistakeTypeApi.getAll();
-    const mistakeTypes = mistakeTypeResponse.data;
-    this.setState({students, lessons, mistakeTypes});
-  };
-
   render() {
-    const {open, handleClose} = this.props;
-    const {
-      selectedStudent, selectedLesson, selectedMistakeType,
-      students, lessons, mistakeTypes
-    } = this.state;
+    const {open, handleClose, students, lessons, mistakeTypes} = this.props;
+    const {selectedStudent, selectedLesson, selectedMistakeType,} = this.state;
 
     const studentSuggestions = students.map(student => ({
       value: student,

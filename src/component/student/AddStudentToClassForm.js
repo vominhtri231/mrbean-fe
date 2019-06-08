@@ -7,13 +7,11 @@ import FormLabel from "@material-ui/core/FormLabel";
 import DialogActions from "@material-ui/core/DialogActions";
 import Button from "@material-ui/core/Button";
 import AutoCompete from "../common/AutoCompete";
-import StudentApi from "../../api/StudentApi";
 import Validater from "../../util/Validater";
 import FormError from "../common/FormError";
 
 class AddStudentToClassForm extends React.Component {
   state = {
-    students: [],
     selectedStudents: [],
     error: undefined
   };
@@ -38,15 +36,9 @@ class AddStudentToClassForm extends React.Component {
     this.setState({selectedStudents: value})
   };
 
-  async componentDidMount() {
-    const response = await StudentApi.getAll();
-    const students = response.data;
-    this.setState({students});
-  }
-
   render() {
-    const {open, handleClose} = this.props;
-    const {students, selectedStudents, error} = this.state;
+    const {open, handleClose, students} = this.props;
+    const {selectedStudents, error} = this.state;
     const suggestions = students.map(student => ({
       value: student,
       label: student.email

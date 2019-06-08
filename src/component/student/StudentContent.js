@@ -1,20 +1,21 @@
 import * as React from "react";
 import SearchBar from "../common/SearchBar";
-import StudentApi from "../../api/StudentApi";
 import PaginationTable from "../common/table/PaginationTable";
 import StudentDataRow from "./StudentDataRow";
 import Typography from "@material-ui/core/Typography";
 import ConfirmDialog from "../common/ConfirmDialog";
 import appConstants from "../../util/appConstants";
-import ClassApi from "../../api/ClassApi";
 import AddIcon from "@material-ui/icons/Add"
 import Fab from "@material-ui/core/Fab";
 import AddStudentToClassForm from "./AddStudentToClassForm";
 import Announce from "../common/Annouce";
+import KlassStudentApi from "../../api/KlassStudentApi";
+import StudentApi from "../../api/StudentApi";
 
 class StudentContent extends React.Component {
   state = {
     students: [],
+    notInKlassStudent: [],
     addStudent: false,
     removingStudent: undefined,
     announce: undefined,
@@ -42,11 +43,17 @@ class StudentContent extends React.Component {
 
   removeFromClass = (studentId) => {
     const {klass} = this.props;
-    ClassApi.removeStudents(klass.id, [studentId]).then(() => {
-      const {students} = this.state;
+    KlassStudentApi.unregisterStudents(klass.id, [studentId]).then(() => {
+      const {students, notInKlassStudent} = this.state;
       const removedStudents = students.filter(student => student.id !== parseInt(studentId));
+      const removingStudent = students.filter(student => student.id === parseInt(studentId));
+      const addedNotInKlassStudents = notInKlassStudent.concat(removingStudent);
       const successAnnounce = {message: "Remove student successfully", variant: "success"};
-      this.setState({students: removedStudents, announce: successAnnounce});
+      this.setState({
+        students: removedStudents,
+        announce: successAnnounce,
+        notInKlassStudent: addedNotInKlassStudents
+      });
     }).catch(response => {
       const errorAnnounce = {message: "Remove student fail :" + response.error, variant: "error"};
       this.setState({announce: errorAnnounce})
@@ -56,7 +63,7 @@ class StudentContent extends React.Component {
   addToClass = (students) => {
     const {klass} = this.props;
     const addingStudentsId = students.map(student => student.id);
-    ClassApi.addStudents(klass.id, addingStudentsId).then(() => {
+    KlassStudentApi.registerStudents(klass.id, addingStudentsId).then(() => {
       const successAnnounce = {message: "Add student successfully", variant: "success"};
       this.setState({announce: successAnnounce});
       this.init();
@@ -90,8 +97,13 @@ class StudentContent extends React.Component {
 
   init = async () => {
     const {klass} = this.props;
-    const response = await StudentApi.getAllOfClass(klass.id);
-    this.setState({students: response.data});
+    const studentResponse = await KlassStudentApi.getStudentsOfKlass(klass.id);
+    const allStudentResponse = await StudentApi.getAll(klass.id);
+    const students = studentResponse.data;
+    const allStudents = allStudentResponse.data;
+    const notInKlassStudent = allStudents
+      .filter(allStudent => students.every(student => student.id !== allStudent.id));
+    this.setState({students, notInKlassStudent});
   };
 
   render() {
@@ -137,7 +149,7 @@ class StudentContent extends React.Component {
   }
 
   renderAdminGadgets() {
-    const {removingStudent, addStudent,} = this.state;
+    const {removingStudent, addStudent, notInKlassStudent} = this.state;
     return <>
       {removingStudent && <ConfirmDialog
         open={!!removingStudent}
@@ -155,6 +167,7 @@ class StudentContent extends React.Component {
       </Fab>
       <AddStudentToClassForm
         open={addStudent}
+        students={notInKlassStudent}
         handleSubmit={this.addToClass}
         handleClose={this.handleCloseAddForm}
       />

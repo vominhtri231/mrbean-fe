@@ -20,10 +20,6 @@ class StudentApi {
     return ApiCaller.get(`${baseUrl}/all`);
   }
 
-  static getAllOfClass(klassId) {
-    return ApiCaller.get(`${baseUrl}?klassId=${klassId}`);
-  }
-
   static getStudent(id) {
     return ApiCaller.get(`${baseUrl}/${id}`);
   }

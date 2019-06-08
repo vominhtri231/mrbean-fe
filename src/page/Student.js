@@ -1,5 +1,4 @@
 import React from 'react';
-import ClassApi from "../api/ClassApi";
 import {IconButton, Typography} from "@material-ui/core";
 import LessonContent from "../component/lesson/LessonContent";
 import CustomDrawer from "../component/common/CustomDrawer";
@@ -9,6 +8,7 @@ import App from "../App";
 import StudentMistakeContent from "../component/mistake/StudentMistakeContent";
 import UnfoldMoreIcon from "@material-ui/icons/UnfoldMore"
 import LocalStorageManager from "../util/LocalStorageManager";
+import KlassStudentApi from "../api/KlassStudentApi";
 
 class Student extends React.Component {
   state = {
@@ -35,7 +35,7 @@ class Student extends React.Component {
 
   async getClassesOfStudent(studentId) {
     try {
-      const response = await ClassApi.getClassesOfStudent(studentId);
+      const response = await KlassStudentApi.getKlassesOfStudent(studentId);
       return response.data;
     } catch (e) {
 

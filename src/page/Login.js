@@ -27,7 +27,7 @@ class Login extends React.Component {
   render() {
     const {error, loginSuccess} = this.state;
     if (!!loginSuccess || !!LocalStorageManager.getAccessToken()) {
-      return <Redirect to={"/login"}/>
+      return <Redirect to={"/aa"}/>
     }
     return (<div>
       <LoginDialog handleSubmit={this.handleLogin} error={error}/>
