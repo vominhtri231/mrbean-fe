@@ -4,6 +4,7 @@ import TableCell from "@material-ui/core/TableCell";
 import DeleteIcon from "@material-ui/icons/Delete"
 import BuildIcon from "@material-ui/icons/Build"
 import IconButton from "@material-ui/core/IconButton";
+import PlaylistAddCheckIcon from "@material-ui/icons/PlaylistAddCheck"
 import PageviewIcon from "@material-ui/icons/Pageview"
 import AddIcon from "@material-ui/icons/Add"
 import Chip from "@material-ui/core/Chip";
@@ -13,7 +14,7 @@ import appConstants from "../../util/appConstants";
 class LessonDataRow extends React.Component {
   render() {
     const {
-      data, onDelete, mode, onChoose,
+      data, onDelete, mode, onChoose, onCheckAttendance,
       addHomework, editHomework, deleteHomework,
       doHomework, watchHomework
     } = this.props;
@@ -75,6 +76,11 @@ class LessonDataRow extends React.Component {
                       onClick={() => onChoose(data)}>
             <BuildIcon/>
           </IconButton>
+          <IconButton aria-label="Check attendance"
+                      onClick={() => onCheckAttendance(data)}>
+            <PlaylistAddCheckIcon/>
+          </IconButton>
+          <IconButton/>
         </TableCell> :
         <TableCell>
           <IconButton aria-label="Lesson content"

@@ -3,6 +3,7 @@ import SearchBar from "../common/SearchBar";
 import LessonApi from "../../api/LessonApi";
 import LessonDataRow from "./LessonDataRow";
 import AddIcon from "@material-ui/icons/Add"
+import PlaylistAddCheckIcon from "@material-ui/icons/PlaylistAddCheck"
 import Fab from "@material-ui/core/Fab";
 import AddLessonForm from "./AddLessonForm";
 import EditLessonForm from "./EditLessonForm";
@@ -20,6 +21,8 @@ import HomeworkSpec from "../homework/HomeworkSpec";
 import HomeworkWorksheetResult from "../homework/HomeworkWorksheetResult";
 import DateUtils from "../../util/DateUtils";
 import Announce from "../common/Annouce";
+import CheckAttendanceForm from "./CheckAttendanceForm";
+import LessonAttendanceApi from "../../api/LessonAttendanceApi";
 
 class LessonContent extends React.Component {
   state = {
@@ -28,6 +31,7 @@ class LessonContent extends React.Component {
     openAddLessonForm: false,
     selectedLesson: undefined,
     deletingLesson: undefined,
+    checkAttendanceLesson: undefined,
     homeworkLessonId: undefined,
     selectedHomework: undefined,
     deletingHomework: undefined,
@@ -59,6 +63,14 @@ class LessonContent extends React.Component {
 
   handleCloseDeleteLesson = () => {
     this.setState({deletingLesson: undefined})
+  };
+
+  handleOpenCheckAttendance = (lesson) => {
+    this.setState({checkAttendanceLesson: lesson});
+  };
+
+  handleCloseCheckAttendance = () => {
+    this.setState({checkAttendanceLesson: undefined});
   };
 
   handleOpenAddHomeworkForm = (lessonId) => {
@@ -175,6 +187,16 @@ class LessonContent extends React.Component {
       this.setState({lessons: deletedLessons, announce: successAnnounce})
     }).catch(response => {
       const errorAnnounce = {message: "Delete lesson fail :" + response.error, variant: "error"};
+      this.setState({announce: errorAnnounce})
+    })
+  };
+
+  updateAttendance = (lessonAttendances) => {
+    LessonAttendanceApi.update(lessonAttendances).then(() => {
+      const successAnnounce = {message: "Save attendance successfully", variant: "success"};
+      this.setState({announce: successAnnounce});
+    }).catch(response => {
+      const errorAnnounce = {message: "Save attendance fail :" + response.error, variant: "error"};
       this.setState({announce: errorAnnounce})
     })
   };
@@ -362,6 +384,7 @@ class LessonContent extends React.Component {
             data={lesson}
             onChoose={this.handleOnChooseLesson}
             onDelete={this.handleDeleteLesson}
+            onCheckAttendance={this.handleOpenCheckAttendance}
             addHomework={this.handleOpenAddHomeworkForm}
             deleteHomework={this.handleOpenDeleteHomeworkDialog}
             editHomework={this.handleOpenEditHomeworkForm}
@@ -400,7 +423,7 @@ class LessonContent extends React.Component {
     const {
       openAddLessonForm, selectedLesson, homeworkLessonId,
       selectedHomework, deletingHomework, deletingLesson,
-      endingHomework, watchingHomework
+      endingHomework, watchingHomework, checkAttendanceLesson
     } = this.state;
     return <>
       <Fab
@@ -424,6 +447,12 @@ class LessonContent extends React.Component {
         handleClose={this.handleCloseEditForm}
         handleSubmit={this.editLesson}
       />
+      {checkAttendanceLesson && <CheckAttendanceForm
+        open={!!checkAttendanceLesson}
+        handleSubmit={this.updateAttendance}
+        handleClose={this.handleCloseCheckAttendance}
+        lessonId={checkAttendanceLesson.id}
+      />}
       <HomeworkInput
         open={!!homeworkLessonId}
         lessonId={homeworkLessonId}

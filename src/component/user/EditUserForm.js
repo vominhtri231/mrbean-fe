@@ -28,11 +28,11 @@ class EditUserForm extends React.Component {
   handleSubmitButtonClick = () => {
     const {email, name, phoneNumber, dateOfBirth, workspace, isWorker} = this.state;
     const {user, handleClose, handleSubmit} = this.props;
-    const validateResult = Validater.validateUser(user.role, email, name, phoneNumber, workspace);
-    if (validateResult) {
-      this.setState({error: validateResult});
-      return;
-    }
+    // const validateResult = Validater.validateUser(user.role, email, name, phoneNumber, workspace);
+    // if (validateResult) {
+    //   this.setState({error: validateResult});
+    //   return;
+    // }
     this.setState({
       error: undefined,
     });

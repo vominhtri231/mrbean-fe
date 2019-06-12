@@ -6,6 +6,7 @@ import {Typography} from "@material-ui/core";
 import LessonContent from "../component/lesson/LessonContent";
 import appConstants from "../util/appConstants";
 import MistakeContent from "../component/mistake/MistakeContent";
+import AttendanceContent from "../component/lesson/AttendanceContent";
 
 class Klass extends React.Component {
   state = {
@@ -90,6 +91,11 @@ class Klass extends React.Component {
             icon: "error",
             content: <MistakeContent
               klass={klass}/>
+          },
+          {
+            name: "Attendances of class",
+            icon: "playlist_add_check",
+            content: <AttendanceContent klass={klass}/>
           }
         ]}
         {...this.props}
